@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';
 import React from 'react';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, defineMessage} from 'react-intl';
 import {connect} from 'react-redux';
 import locales from 'scratch-l10n';
 
@@ -13,9 +13,16 @@ import {closeLanguageMenu, openLanguageMenu} from '../../reducers/menus.js';
 import {selectLocale} from '../../reducers/locales.js';
 
 import styles from './settings-menu.css';
+import intlShape from '../../lib/intlShape.js';
 
 import dropdownCaret from './dropdown-caret.svg';
-import {BaseMenu} from './base-menu';
+import BaseMenu from './base-menu';
+
+const languageMenu = defineMessage({
+    id: 'languageMenu.aria.languageMenu',
+    defaultMessage: 'Language menu',
+    description: 'ARIA label for language menu'
+});
 
 class LanguageMenu extends BaseMenu {
     constructor (props) {
@@ -51,9 +58,9 @@ class LanguageMenu extends BaseMenu {
         this.refocusItemByIndex(Object.keys(locales).indexOf(this.props.currentLocale));
     }
 
-
     render () {
         const {
+            intl,
             currentLocale,
             menuRef,
             isRtl,
@@ -67,7 +74,7 @@ class LanguageMenu extends BaseMenu {
                     onClick={this.handleOnOpen}
                     onMouseOver={this.handleMouseOver}
                     ref={menuRef}
-                    aria-label="Language Menu"
+                    aria-label={intl.formatMessage(languageMenu)}
                     aria-expanded={this.isExpanded()}
                     role="button"
                     tabIndex={-1}
@@ -125,6 +132,7 @@ class LanguageMenu extends BaseMenu {
 }
 
 LanguageMenu.propTypes = {
+    intl: intlShape,
     currentLocale: PropTypes.string,
     menuRef: PropTypes.shape({current: PropTypes.instanceOf(Element)}),
     isRtl: PropTypes.bool,

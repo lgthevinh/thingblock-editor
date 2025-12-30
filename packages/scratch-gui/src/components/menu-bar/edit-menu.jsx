@@ -4,13 +4,20 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
 import editIcon from './icon--edit.svg';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, defineMessage} from 'react-intl';
 import MenuBarMenu from './menu-bar-menu.jsx';
 import {MenuItem, MenuSection} from '../menu/menu.jsx';
-import {BaseMenu} from './base-menu';
+import BaseMenu from './base-menu';
 import dropdownCaret from './dropdown-caret.svg';
 import DeletionRestorer from '../../containers/deletion-restorer.jsx';
 import TurboMode from '../../containers/turbo-mode.jsx';
+import intlShape from '../../lib/intlShape.js';
+
+const editMenu = defineMessage({
+    id: 'editMenu.aria.editMenu',
+    defaultMessage: 'Edit menu',
+    description: 'ARIA label for edit menu'
+});
 
 export class EditMenu extends BaseMenu {
     constructor (props) {
@@ -33,7 +40,7 @@ export class EditMenu extends BaseMenu {
                 })}
                 onClick={this.handleOnOpen}
                 role="button"
-                aria-label="Edit Menu"
+                aria-label={this.props.intl.formatMessage(editMenu)}
                 aria-expanded={this.isExpanded()}
                 tabIndex={0}
                 onKeyDown={this.handleKeyPress}
@@ -94,6 +101,7 @@ export class EditMenu extends BaseMenu {
 }
 
 EditMenu.propTypes = {
+    intl: intlShape.isRequired,
     menuRef: PropTypes.shape({current: PropTypes.instanceOf(Element)}),
     isRtl: PropTypes.bool,
     restoreOptionMessage: PropTypes.func,

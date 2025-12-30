@@ -6,7 +6,7 @@ import {connect} from 'react-redux';
 
 import check from './check.svg';
 import {MenuItem, Submenu} from '../menu/menu.jsx';
-import {BaseMenu} from './base-menu.jsx';
+import BaseMenu from './base-menu.jsx';
 
 import styles from './settings-menu.css';
 
@@ -68,7 +68,8 @@ class PreferenceMenu extends BaseMenu {
             submenuLabel,
             selectedItemKey,
             isRtl,
-            menuRef
+            menuRef,
+            ariaLabel
         } = this.props;
 
         const itemKeys = Object.keys(itemsMap);
@@ -81,6 +82,7 @@ class PreferenceMenu extends BaseMenu {
                     onClick={this.handleOnOpen}
                     ref={menuRef}
                     aria-expanded={this.isExpanded()}
+                    aria-label={ariaLabel}
                     role="button"
                     tabIndex={-1}
                     onKeyDown={this.handleKeyPress}
@@ -116,6 +118,7 @@ class PreferenceMenu extends BaseMenu {
 };
 
 PreferenceMenu.propTypes = {
+    ariaLabel: PropTypes.string,
     itemsMap: PropTypes.objectOf(PropTypes.shape({
         icon: PropTypes.string,
         label: intlMessageShape.isRequired

@@ -4,15 +4,21 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
 import fileIcon from './icon--file.svg';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, defineMessage} from 'react-intl';
 import MenuBarMenu from './menu-bar-menu.jsx';
 import {MenuItem, MenuSection} from '../menu/menu.jsx';
-import {BaseMenu} from './base-menu';
+import BaseMenu from './base-menu';
 import SB3Downloader from '../../containers/sb3-downloader.jsx';
 import dropdownCaret from './dropdown-caret.svg';
 
 import sharedMessages from '../../lib/shared-messages';
 import intlShape from '../../lib/intlShape.js';
+
+const fileMenu = defineMessage({
+    id: 'fileMenu.aria.fileMenu',
+    defaultMessage: 'File menu',
+    description: 'ARIA label for file menu'
+});
 
 export class FileMenu extends BaseMenu {
     constructor (props) {
@@ -36,6 +42,21 @@ export class FileMenu extends BaseMenu {
     }
 
     render () {
+        const {
+            intl,
+            isRtl,
+            menuRef,
+            canSave,
+            canCreateCopy,
+            canRemix,
+            onClickNew,
+            onClickSave,
+            onClickSaveAsCopy,
+            onClickRemix,
+            onStartSelectingFileUpload,
+            getSaveToComputerHandler
+        } = this.props;
+
         const saveNowMessage = (
             <FormattedMessage
                 defaultMessage="Save now"
@@ -70,11 +91,11 @@ export class FileMenu extends BaseMenu {
                     [styles.active]: this.isExpanded()
                 })}
                 onClick={this.handleOnOpen}
-                aria-label="File Menu"
+                aria-label={intl.formatMessage(fileMenu)}
                 aria-expanded={this.isExpanded()}
                 role="button"
                 tabIndex={0}
-                ref={this.props.menuRef}
+                ref={menuRef}
                 onKeyDown={this.handleKeyPress}
             >
                 <img src={fileIcon} />
@@ -89,42 +110,42 @@ export class FileMenu extends BaseMenu {
                 <MenuBarMenu
                     className={classNames(styles.menuBarMenu)}
                     open={this.isExpanded()}
-                    place={this.props.isRtl ? 'left' : 'right'}
+                    place={isRtl ? 'left' : 'right'}
                     onRequestClose={this.handleOnClose}
                 >
                     <MenuSection>
                         <MenuItem
-                            isRtl={this.props.isRtl}
-                            onClick={this.props.onClickNew}
+                            isRtl={isRtl}
+                            onClick={onClickNew}
                             menuRef={this.newProjectRef}
                             onParentKeyPress={this.handleKeyPressOpenMenu}
                         >
                             {newProjectMessage}
                         </MenuItem>
                     </MenuSection>
-                    {(this.props.canSave || this.props.canCreateCopy || this.props.canRemix) && (
+                    {(canSave || canCreateCopy || canRemix) && (
                         <MenuSection>
-                            {this.props.canSave && (
+                            {canSave && (
                                 <MenuItem
-                                    onClick={this.props.onClickSave}
+                                    onClick={onClickSave}
                                     menuRef={this.saveRef}
                                     onParentKeyPress={this.handleKeyPressOpenMenu}
                                 >
                                     {saveNowMessage}
                                 </MenuItem>
                             )}
-                            {this.props.canCreateCopy && (
+                            {canCreateCopy && (
                                 <MenuItem
-                                    onClick={this.props.onClickSaveAsCopy}
+                                    onClick={onClickSaveAsCopy}
                                     menuRef={this.createRef}
                                     onParentKeyPress={this.handleKeyPressOpenMenu}
                                 >
                                     {createCopyMessage}
                                 </MenuItem>
                             )}
-                            {this.props.canRemix && (
+                            {canRemix && (
                                 <MenuItem
-                                    onClick={this.props.onClickRemix}
+                                    onClick={onClickRemix}
                                     menuRef={this.remixRef}
                                     onParentKeyPress={this.handleKeyPressOpenMenu}
                                 >
@@ -135,16 +156,16 @@ export class FileMenu extends BaseMenu {
                     )}
                     <MenuSection>
                         <MenuItem
-                            onClick={this.props.onStartSelectingFileUpload}
+                            onClick={onStartSelectingFileUpload}
                             menuRef={this.loadFromComputerRef}
                             onParentKeyPress={this.handleKeyPressOpenMenu}
                         >
-                            {this.props.intl.formatMessage(sharedMessages.loadFromComputerTitle)}
+                            {intl.formatMessage(sharedMessages.loadFromComputerTitle)}
                         </MenuItem>
                         <SB3Downloader>{(className, downloadProjectCallback) => (
                             <MenuItem
                                 className={className}
-                                onClick={this.props.getSaveToComputerHandler(downloadProjectCallback)}
+                                onClick={getSaveToComputerHandler(downloadProjectCallback)}
                                 menuRef={this.saveToComputerRef}
                                 onParentKeyPress={this.handleKeyPressOpenMenu}
                             >

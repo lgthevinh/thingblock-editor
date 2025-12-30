@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, defineMessage, defineMessages} from 'react-intl';
 import {connect} from 'react-redux';
 
 import LanguageMenu from './language-menu.jsx';
@@ -20,10 +20,29 @@ import styles from './settings-menu.css';
 
 import dropdownCaret from './dropdown-caret.svg';
 import settingsIcon from './icon--settings.svg';
-import {BaseMenu} from './base-menu.jsx';
+import BaseMenu from './base-menu.jsx';
 
 import themeIcon from '../../lib/assets/icon--theme.svg';
 import {openColorModeMenu, openThemeMenu} from '../../reducers/menus.js';
+import intlShape from '../../lib/intlShape.js';
+
+const ariaMessages = defineMessages({
+    settingsMenu: {
+        id: 'settingsMenu.aria.settingsMenu',
+        defaultMessage: 'Settings menu',
+        description: 'ARIA label for settings menu'
+    },
+    themeMenu: {
+        id: 'settingsMenu.aria.themeMenu',
+        defaultMessage: 'Theme menu',
+        description: 'ARIA label for theme menu'
+    },
+    colorMenu: {
+        id: 'settingsMenu.aria.colorMenu',
+        defaultMessage: 'Color menu',
+        description: 'ARIA label for color menu'
+    }
+});
 
 const enabledColorModes = [DEFAULT_MODE, HIGH_CONTRAST_MODE];
 
@@ -47,6 +66,7 @@ class SettingsMenu extends BaseMenu {
             canChangeColorMode,
             canChangeTheme,
             hasActiveMembership,
+            intl,
             isRtl,
             activeColorMode,
             onChangeColorMode,
@@ -78,7 +98,7 @@ class SettingsMenu extends BaseMenu {
             role="button"
             aria-expanded={this.isExpanded()}
             tabIndex={0}
-            aria-label="Settings"
+            aria-label={intl.formatMessage(ariaMessages.settingsMenu)}
             onClick={this.handleOnOpen}
             onKeyDown={this.handleKeyPress}
             ref={this.menuRef}
@@ -100,6 +120,7 @@ class SettingsMenu extends BaseMenu {
             >
                 <MenuSection>
                     {canChangeLanguage && <LanguageMenu
+                        intl={intl}
                         menuRef={this.languageRef}
                         depth={2}
                     />}
@@ -107,6 +128,7 @@ class SettingsMenu extends BaseMenu {
                         // TODO: Consider always showing the theme menu, even if there is a single available theme
                         availableThemesLength > 1 &&
                         <PreferenceMenu
+                            ariaLabel={intl.formatMessage(ariaMessages.themeMenu)}
                             menuRef={this.themeRef}
                             depth={2}
                             itemsMap={availableThemesMap}
@@ -122,6 +144,7 @@ class SettingsMenu extends BaseMenu {
                             onOpen={onRequestOpenTheme}
                         />}
                     {canChangeColorMode && <PreferenceMenu
+                        ariaLabel={intl.formatMessage(ariaMessages.colorMenu)}
                         menuRef={this.colorRef}
                         depth={2}
                         itemsMap={enabledColorModesMap}
@@ -142,6 +165,7 @@ class SettingsMenu extends BaseMenu {
 };
 
 SettingsMenu.propTypes = {
+    intl: intlShape,
     canChangeLanguage: PropTypes.bool,
     canChangeColorMode: PropTypes.bool,
     canChangeTheme: PropTypes.bool,

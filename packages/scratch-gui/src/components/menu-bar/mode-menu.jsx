@@ -3,10 +3,17 @@ import styles from './menu-bar.css';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, defineMessage} from 'react-intl';
 import MenuBarMenu from './menu-bar-menu.jsx';
 import {MenuItem, MenuSection} from '../menu/menu.jsx';
-import {BaseMenu} from './base-menu';
+import BaseMenu from './base-menu';
+
+import intlShape from '../../lib/intlShape.js';
+const modeMenu = defineMessage({
+    id: 'modeMenu.aria.modeMenu',
+    defaultMessage: 'Mode menu',
+    description: 'ARIA label for mode menu'
+});
 
 export class ModeMenu extends BaseMenu {
     constructor (props) {
@@ -22,6 +29,14 @@ export class ModeMenu extends BaseMenu {
     }
 
     render () {
+        const {
+            intl,
+            isRtl,
+            mode2020,
+            modeNow,
+            onSetMode
+        } = this.props;
+
         return (
             <div
                 className={classNames(styles.menuBarItem, styles.hoverable, {
@@ -29,7 +44,7 @@ export class ModeMenu extends BaseMenu {
                 })}
                 onClick={this.handleOnOpen}
                 role="button"
-                aria-label="Mode"
+                aria-label={intl.formatMessage(modeMenu)}
                 aria-expanded={this.isExpanded()}
                 tabIndex={0}
                 onKeyDown={this.handleKeyPress}
@@ -44,16 +59,16 @@ export class ModeMenu extends BaseMenu {
                 <MenuBarMenu
                     className={classNames(styles.menuBarMenu)}
                     open={this.isExpanded()}
-                    place={this.props.isRtl ? 'left' : 'right'}
+                    place={isRtl ? 'left' : 'right'}
                     onRequestClose={this.handleOnClose}
                 >
                     <MenuSection>
                         <MenuItem
-                            onClick={this.props.onSetMode('NOW')}
+                            onClick={onSetMode('NOW')}
                             menuRef={this.normalRef}
                             onParentKeyPress={this.handleKeyPressOpenMenu}
                         >
-                            <span className={classNames({[styles.inactive]: !this.props.modeNow})}>
+                            <span className={classNames({[styles.inactive]: !modeNow})}>
                                 {'✓'}
                             </span>
                             {' '}
@@ -64,11 +79,11 @@ export class ModeMenu extends BaseMenu {
                             />
                         </MenuItem>
                         <MenuItem
-                            onClick={this.props.onSetMode('2020')}
+                            onClick={onSetMode('2020')}
                             menuRef={this.caturdayRef}
                             onParentKeyPress={this.handleKeyPressOpenMenu}
                         >
-                            <span className={classNames({[styles.inactive]: !this.props.mode2020})}>
+                            <span className={classNames({[styles.inactive]: !mode2020})}>
                                 {'✓'}
                             </span>
                             {' '}
@@ -86,6 +101,7 @@ export class ModeMenu extends BaseMenu {
 }
 
 ModeMenu.propTypes = {
+    intl: intlShape,
     menuRef: PropTypes.shape({current: PropTypes.instanceOf(Element)}),
     onSetMode: PropTypes.func,
     modeNow: PropTypes.bool,

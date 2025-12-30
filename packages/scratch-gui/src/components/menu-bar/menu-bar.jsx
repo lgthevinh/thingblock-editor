@@ -103,6 +103,11 @@ const ariaMessages = defineMessages({
         id: 'gui.menuBar.debug',
         defaultMessage: 'Debug',
         description: 'accessibility text for the debug button'
+    },
+    goHome: {
+        id: 'gui.menuBar.goHome',
+        defaultMessage: 'Go home',
+        description: 'accessibility text for the go home button'
     }
 });
 
@@ -428,7 +433,7 @@ class MenuBar extends React.Component {
                         <div className={classNames(styles.menuBarItem)}>
                             <img
                                 role="button"
-                                aria-label="Go Home"
+                                aria-label={this.props.intl.formatMessage(ariaMessages.goHome)}
                                 tabIndex={0}
                                 id="logo_img"
                                 alt="Scratch"
@@ -448,6 +453,7 @@ class MenuBar extends React.Component {
                             canChangeColorMode={this.props.canChangeColorMode}
                             canChangeTheme={this.props.canChangeTheme}
                             hasActiveMembership={this.props.hasActiveMembership}
+                            intl={this.props.intl}
                             isRtl={this.props.isRtl}
                             onClose={this.props.onRequestCloseSettings}
                             onOpen={this.props.onClickSettings}
@@ -474,6 +480,7 @@ class MenuBar extends React.Component {
                             depth={1}
                             onOpen={this.props.onClickEdit}
                             onClose={this.props.onRequestCloseEdit}
+                            intl={this.props.intl}
                             isRtl={this.props.isRtl}
                             onRestoreOption={this.handleRestoreOption}
                             restoreOptionMessage={this.restoreOptionMessage}
@@ -486,6 +493,7 @@ class MenuBar extends React.Component {
                             onSetMode={this.handleSetMode}
                             modeNow={this.props.modeNow}
                             mode2020={this.props.mode2020}
+                            intl={this.props.intl}
                             isRtl={this.props.isRtl}
                         />)}
                     </div>
