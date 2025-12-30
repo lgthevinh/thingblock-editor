@@ -142,7 +142,6 @@ const closeSettingsMenu = () => closeMenu(MENU_SETTINGS);
 
 const openColorModeMenu = () => openMenu(MENU_COLOR_MODE);
 const closeColorModeMenu = () => closeMenu(MENU_COLOR_MODE);
-const colorModeMenuOpen = state => state.scratchGui.menus[MENU_COLOR_MODE];
 
 const openThemeMenu = () => openMenu(MENU_THEME);
 const closeThemeMenu = () => closeMenu(MENU_THEME);
@@ -171,7 +170,6 @@ export {
     closeSettingsMenu,
     openColorModeMenu,
     closeColorModeMenu,
-    colorModeMenuOpen,
     openThemeMenu,
     closeThemeMenu
 };

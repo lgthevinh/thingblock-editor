@@ -23,7 +23,7 @@ import settingsIcon from './icon--settings.svg';
 import {BaseMenu} from './base-menu.jsx';
 
 import themeIcon from '../../lib/assets/icon--theme.svg';
-import {colorModeMenuOpen, openColorModeMenu, openThemeMenu} from '../../reducers/menus.js';
+import {openColorModeMenu, openThemeMenu} from '../../reducers/menus.js';
 
 const enabledColorModes = [DEFAULT_MODE, HIGH_CONTRAST_MODE];
 
@@ -149,7 +149,6 @@ SettingsMenu.propTypes = {
     activeColorMode: PropTypes.string,
     onChangeColorMode: PropTypes.func,
     onRequestOpenColorMode: PropTypes.func,
-    isColorModeMenuOpen: PropTypes.bool,
     activeTheme: PropTypes.string,
     onChangeTheme: PropTypes.func,
     onRequestOpenTheme: PropTypes.func
@@ -157,8 +156,7 @@ SettingsMenu.propTypes = {
 
 const mapStateToProps = state => ({
     activeColorMode: state.scratchGui.settings.colorMode,
-    activeTheme: state.scratchGui.settings.theme,
-    isColorModeMenuOpen: colorModeMenuOpen(state)
+    activeTheme: state.scratchGui.settings.theme
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

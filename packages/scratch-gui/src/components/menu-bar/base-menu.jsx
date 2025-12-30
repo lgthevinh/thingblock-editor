@@ -19,7 +19,7 @@ onClose,
 menuRef,
 depth
 */
-export class BaseMenu extends React.PureComponent {
+class BaseMenu extends React.PureComponent {
     constructor (props) {
         super(props);
         bindAll(this, [
@@ -127,3 +127,5 @@ BaseMenu.defaultProps = {
     onClose: () => {},
     clearOnItemSelect: false
 };
+
+export default BaseMenu;
