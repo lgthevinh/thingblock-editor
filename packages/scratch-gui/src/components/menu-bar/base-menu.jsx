@@ -1,4 +1,4 @@
-import {MenuRefContext} from '../context-menu/menu-ref-context';
+import {MenuRefContext} from '../../contexts/menu-ref-context';
 import React from 'react';
 import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';

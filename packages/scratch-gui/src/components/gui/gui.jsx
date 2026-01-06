@@ -46,7 +46,7 @@ import DebugModal from '../debug-modal/debug-modal.jsx';
 import {setPlatform} from '../../reducers/platform.js';
 import {setTheme} from '../../reducers/settings.js';
 import {PLATFORM} from '../../lib/platform.js';
-import {MenuRefProvider} from '../context-menu/menu-ref-context.jsx';
+import {MenuRefProvider} from '../../contexts/menu-ref-context.jsx';
 
 // Cache this value to only retrieve it once the first time.
 // Assume that it doesn't change for a session.
