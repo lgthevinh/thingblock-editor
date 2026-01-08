@@ -18,7 +18,8 @@ export class MenuRefProvider extends React.Component {
             'cut',
             'clear',
             'isTopMenu',
-            'isOpenMenu'
+            'isOpenMenu',
+            'bottomMenu'
         ]);
     }
 
@@ -52,8 +53,12 @@ export class MenuRefProvider extends React.Component {
     }
 
     clear () {
-        console.log("clearing now");
         this.setState({refStack: []});
+    }
+
+    bottomMenu () {
+        const {refStack} = this.state;
+        return refStack.length > 0 ? refStack[0] : null;
     }
 
     isTopMenu (ref) {
@@ -73,7 +78,8 @@ export class MenuRefProvider extends React.Component {
             cut: this.cut,
             clear: this.clear,
             isTopMenu: this.isTopMenu,
-            isOpenMenu: this.isOpenMenu
+            isOpenMenu: this.isOpenMenu,
+            bottomMenu: this.bottomMenu
         };
 
         return (

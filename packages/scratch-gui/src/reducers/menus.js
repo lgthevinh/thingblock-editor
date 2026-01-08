@@ -121,30 +121,9 @@ const openAccountMenu = () => openMenu(MENU_ACCOUNT);
 const closeAccountMenu = () => closeMenu(MENU_ACCOUNT);
 const accountMenuOpen = state => state.scratchGui.menus[MENU_ACCOUNT];
 
-const openEditMenu = () => openMenu(MENU_EDIT);
-const closeEditMenu = () => closeMenu(MENU_EDIT);
-
-const openFileMenu = () => openMenu(MENU_FILE);
-const closeFileMenu = () => closeMenu(MENU_FILE);
-
-const openLanguageMenu = () => openMenu(MENU_LANGUAGE);
-const closeLanguageMenu = () => closeMenu(MENU_LANGUAGE);
-
 const openLoginMenu = () => openMenu(MENU_LOGIN);
 const closeLoginMenu = () => closeMenu(MENU_LOGIN);
 const loginMenuOpen = state => state.scratchGui.menus[MENU_LOGIN];
-
-const openModeMenu = () => openMenu(MENU_MODE);
-const closeModeMenu = () => closeMenu(MENU_MODE);
-
-const openSettingsMenu = () => openMenu(MENU_SETTINGS);
-const closeSettingsMenu = () => closeMenu(MENU_SETTINGS);
-
-const openColorModeMenu = () => openMenu(MENU_COLOR_MODE);
-const closeColorModeMenu = () => closeMenu(MENU_COLOR_MODE);
-
-const openThemeMenu = () => openMenu(MENU_THEME);
-const closeThemeMenu = () => closeMenu(MENU_THEME);
 
 export {
     reducer as default,
@@ -155,21 +134,7 @@ export {
     openAccountMenu,
     closeAccountMenu,
     accountMenuOpen,
-    openEditMenu,
-    closeEditMenu,
-    openFileMenu,
-    closeFileMenu,
-    openLanguageMenu,
-    closeLanguageMenu,
     openLoginMenu,
     closeLoginMenu,
-    loginMenuOpen,
-    openModeMenu,
-    closeModeMenu,
-    openSettingsMenu,
-    closeSettingsMenu,
-    openColorModeMenu,
-    closeColorModeMenu,
-    openThemeMenu,
-    closeThemeMenu
+    loginMenuOpen
 };

@@ -117,6 +117,7 @@ export default function useMenuNavigation ({
         handleKeyPress,
         handleKeyPressOpenMenu,
         handleOnOpen,
-        handleOnClose
+        handleOnClose,
+        refocusRef
     };
 }

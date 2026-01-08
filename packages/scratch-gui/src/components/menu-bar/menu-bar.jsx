@@ -56,17 +56,9 @@ import {
     openAccountMenu,
     closeAccountMenu,
     accountMenuOpen,
-    openFileMenu,
-    closeFileMenu,
-    openEditMenu,
-    closeEditMenu,
     openLoginMenu,
     closeLoginMenu,
-    loginMenuOpen,
-    openModeMenu,
-    closeModeMenu,
-    openSettingsMenu,
-    closeSettingsMenu
+    loginMenuOpen
 } from '../../reducers/menus';
 
 import collectMetadata from '../../lib/collect-metadata';
@@ -455,14 +447,11 @@ class MenuBar extends React.Component {
                             hasActiveMembership={this.props.hasActiveMembership}
                             intl={this.props.intl}
                             isRtl={this.props.isRtl}
-                            onClose={this.props.onRequestCloseSettings}
                             onOpen={this.props.onClickSettings}
                         />)}
                         {(this.props.canManageFiles) && (<FileMenu
                             menuRef={this.fileRef}
                             depth={1}
-                            // onOpen={this.props.onClickFile}
-                            // onClose={this.props.onRequestCloseFile}
                             onStartSelectingFileUpload={this.props.onStartSelectingFileUpload}
                             onClickSave={this.handleClickSave}
                             onClickSaveAsCopy={this.handleClickSaveAsCopy}
@@ -478,8 +467,6 @@ class MenuBar extends React.Component {
                         <EditMenu
                             menuRef={this.editRef}
                             depth={1}
-                            onOpen={this.props.onClickEdit}
-                            onClose={this.props.onRequestCloseEdit}
                             intl={this.props.intl}
                             isRtl={this.props.isRtl}
                             onRestoreOption={this.handleRestoreOption}
@@ -488,8 +475,6 @@ class MenuBar extends React.Component {
                         {this.props.isTotallyNormal && (<ModeMenu
                             menuRef={this.modeRef}
                             depth={1}
-                            onOpen={this.props.onClickMode}
-                            onClose={this.props.onRequestCloseMode}
                             onSetMode={this.handleSetMode}
                             modeNow={this.props.modeNow}
                             mode2020={this.props.mode2020}
@@ -836,7 +821,7 @@ MenuBar.propTypes = {
     onRequestCloseFile: PropTypes.func,
     onRequestCloseLogin: PropTypes.func,
     onRequestCloseMode: PropTypes.func,
-    onRequestCloseSettings: PropTypes.func,
+    // onRequestCloseSettings: PropTypes.func,
     onRequestOpenAbout: PropTypes.func,
     onSeeCommunity: PropTypes.func,
     onSetTimeTravelMode: PropTypes.func,
@@ -917,18 +902,10 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     onOpenDebugModal: () => dispatch(openDebugModal()),
     onClickAccount: () => dispatch(openAccountMenu()),
     onRequestCloseAccount: () => dispatch(closeAccountMenu()),
-    onClickFile: () => dispatch(openFileMenu()),
-    onRequestCloseFile: () => dispatch(closeFileMenu()),
-    onClickEdit: () => dispatch(openEditMenu()),
-    onRequestCloseEdit: () => dispatch(closeEditMenu()),
     onClickLogin: ownProps.onClickLogin ?? (() => dispatch(openLoginMenu())),
     onRequestCloseLogin: () => dispatch(closeLoginMenu()),
-    onClickMode: () => dispatch(openModeMenu()),
-    onRequestCloseMode: () => dispatch(closeModeMenu()),
     onRequestOpenAbout: () => dispatch(openAboutMenu()),
     onRequestCloseAbout: () => dispatch(closeAboutMenu()),
-    onClickSettings: () => dispatch(openSettingsMenu()),
-    onRequestCloseSettings: () => dispatch(closeSettingsMenu()),
     onClickNew: needSave => dispatch(requestNewProject(needSave)),
     onClickRemix: () => dispatch(remixProject()),
     onClickSave: () => dispatch(manualUpdateProject()),

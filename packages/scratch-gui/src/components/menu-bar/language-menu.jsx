@@ -134,6 +134,7 @@ LanguageMenu.propTypes = {
     intl: intlShape,
     currentLocale: PropTypes.string,
     menuRef: PropTypes.shape({current: PropTypes.instanceOf(Element)}),
+    settingsMenuRef: PropTypes.shape({current: PropTypes.instanceOf(Element)}),
     isRtl: PropTypes.bool,
     menuOpen: PropTypes.bool,
     onChangeLanguage: PropTypes.func

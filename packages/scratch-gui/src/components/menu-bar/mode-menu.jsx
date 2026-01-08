@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import {FormattedMessage, defineMessage} from 'react-intl';
 import MenuBarMenu from './menu-bar-menu.jsx';
 import {MenuItem, MenuSection} from '../menu/menu.jsx';
-import BaseMenu from './base-menu';
+import useMenuNavigation from '../../hooks/use-menu-navigation.jsx';
 
 import intlShape from '../../lib/intlShape.js';
 const modeMenu = defineMessage({
@@ -15,90 +15,98 @@ const modeMenu = defineMessage({
     description: 'ARIA label for mode menu'
 });
 
-export class ModeMenu extends BaseMenu {
-    constructor (props) {
-        super(props);
+const ModeMenu = props => {
+    const {
+        intl,
+        isRtl,
+        mode2020,
+        modeNow,
+        onSetMode,
+        menuRef
+    } = props;
 
-        this.normalRef = React.createRef();
-        this.caturdayRef = React.createRef();
-        
-        this.itemRefs = [
-            this.normalRef,
-            this.caturdayRef
-        ];
-    }
+    const normalRef = React.createRef();
+    const caturdayRef = React.createRef();
+    
+    const itemRefs = [
+        normalRef,
+        caturdayRef
+    ];
 
-    render () {
-        const {
-            intl,
-            isRtl,
-            mode2020,
-            modeNow,
-            onSetMode
-        } = this.props;
+    const {
+        isExpanded,
+        handleOnOpen,
+        handleOnClose,
+        handleKeyPress,
+        handleKeyPressOpenMenu
+    } = useMenuNavigation({
+        menuRef,
+        itemRefs,
+        depth: 1
+    });
 
-        return (
-            <div
-                className={classNames(styles.menuBarItem, styles.hoverable, {
-                    [styles.active]: this.isExpanded()
-                })}
-                onClick={this.handleOnOpen}
-                role="button"
-                aria-label={intl.formatMessage(modeMenu)}
-                aria-expanded={this.isExpanded()}
-                tabIndex={0}
-                onKeyDown={this.handleKeyPress}
-            >
-                <div className={classNames(styles.editMenu)}>
-                    <FormattedMessage
-                        defaultMessage="Mode"
-                        description="Mode menu item in the menu bar"
-                        id="gui.menuBar.modeMenu"
-                    />
-                </div>
-                <MenuBarMenu
-                    className={classNames(styles.menuBarMenu)}
-                    open={this.isExpanded()}
-                    place={isRtl ? 'left' : 'right'}
-                    onRequestClose={this.handleOnClose}
-                >
-                    <MenuSection>
-                        <MenuItem
-                            onClick={onSetMode('NOW')}
-                            menuRef={this.normalRef}
-                            onParentKeyPress={this.handleKeyPressOpenMenu}
-                        >
-                            <span className={classNames({[styles.inactive]: !modeNow})}>
-                                {'✓'}
-                            </span>
-                            {' '}
-                            <FormattedMessage
-                                defaultMessage="Normal mode"
-                                description="April fools: resets editor to not have any pranks"
-                                id="gui.menuBar.normalMode"
-                            />
-                        </MenuItem>
-                        <MenuItem
-                            onClick={onSetMode('2020')}
-                            menuRef={this.caturdayRef}
-                            onParentKeyPress={this.handleKeyPressOpenMenu}
-                        >
-                            <span className={classNames({[styles.inactive]: !mode2020})}>
-                                {'✓'}
-                            </span>
-                            {' '}
-                            <FormattedMessage
-                                defaultMessage="Caturday mode"
-                                description="April fools: Cat blocks mode"
-                                id="gui.menuBar.caturdayMode"
-                            />
-                        </MenuItem>
-                    </MenuSection>
-                </MenuBarMenu>
+    return (
+        <div
+            className={classNames(styles.menuBarItem, styles.hoverable, {
+                [styles.active]: isExpanded()
+            })}
+            onClick={handleOnOpen}
+            ref={menuRef}
+            role="button"
+            aria-label={intl.formatMessage(modeMenu)}
+            aria-expanded={isExpanded()}
+            tabIndex={0}
+            onKeyDown={handleKeyPress}
+        >
+            <div className={classNames(styles.editMenu)}>
+                <FormattedMessage
+                    defaultMessage="Mode"
+                    description="Mode menu item in the menu bar"
+                    id="gui.menuBar.modeMenu"
+                />
             </div>
-        );
-    }
-}
+            <MenuBarMenu
+                className={classNames(styles.menuBarMenu)}
+                open={isExpanded()}
+                place={isRtl ? 'left' : 'right'}
+                onRequestClose={handleOnClose}
+            >
+                <MenuSection>
+                    <MenuItem
+                        onClick={onSetMode('NOW')}
+                        menuRef={normalRef}
+                        onParentKeyPress={handleKeyPressOpenMenu}
+                    >
+                        <span className={classNames({[styles.inactive]: !modeNow})}>
+                            {'✓'}
+                        </span>
+                        {' '}
+                        <FormattedMessage
+                            defaultMessage="Normal mode"
+                            description="April fools: resets editor to not have any pranks"
+                            id="gui.menuBar.normalMode"
+                        />
+                    </MenuItem>
+                    <MenuItem
+                        onClick={onSetMode('2020')}
+                        menuRef={caturdayRef}
+                        onParentKeyPress={handleKeyPressOpenMenu}
+                    >
+                        <span className={classNames({[styles.inactive]: !mode2020})}>
+                            {'✓'}
+                        </span>
+                        {' '}
+                        <FormattedMessage
+                            defaultMessage="Caturday mode"
+                            description="April fools: Cat blocks mode"
+                            id="gui.menuBar.caturdayMode"
+                        />
+                    </MenuItem>
+                </MenuSection>
+            </MenuBarMenu>
+        </div>
+    );
+};
 
 ModeMenu.propTypes = {
     intl: intlShape,

@@ -19,21 +19,15 @@ const editMenu = defineMessage({
     description: 'ARIA label for edit menu'
 });
 
-/**
- * EditMenu component – the "Edit" dropdown menu in the menu bar.
- *
- * Handles opening/closing the menu, keyboard navigation, and rendering
- * menu items like Restore and Turbo Mode toggles.
- * @param {object} props - Component props.
- * @param {object} props.intl - React Intl object for formatting messages.
- * @param {boolean} [props.isRtl] - Whether the UI is right-to-left.
- * @param {(deletedItem: {id: string, [key: string]: unknown}) => string} props.restoreOptionMessage
- *   Function that returns the label for the restore menu item.
- * @param {(handleRestore: () => void) => () => void} props.onRestoreOption
- *   Function that takes a restore callback and returns a click handler.
- * @returns {React.ReactNode} The Edit menu button with dropdown items.
- */
 const EditMenu = props => {
+    const {
+        menuRef,
+        intl,
+        isRtl,
+        onRestoreOption,
+        restoreOptionMessage
+    } = props;
+
     const restoreRef = useRef(null);
     const turboRef = useRef(null);
 
@@ -46,7 +40,7 @@ const EditMenu = props => {
         handleOnOpen,
         handleOnClose
     } = useMenuNavigation({
-        menuRef: props.menuRef,
+        menuRef,
         itemRefs,
         depth: 1
     });
@@ -58,10 +52,11 @@ const EditMenu = props => {
             })}
             onClick={handleOnOpen}
             role="button"
-            aria-label={props.intl.formatMessage(editMenu)}
+            aria-label={intl.formatMessage(editMenu)}
             aria-expanded={isExpanded()}
             tabIndex={0}
             onKeyDown={handleKeyPress}
+            ref={menuRef}
         >
             <img src={editIcon} />
             <span className={styles.collapsibleLabel}>
@@ -75,18 +70,18 @@ const EditMenu = props => {
             <MenuBarMenu
                 className={classNames(styles.menuBarMenu)}
                 open={isExpanded()}
-                place={props.isRtl ? 'left' : 'right'}
+                place={isRtl ? 'left' : 'right'}
                 onRequestClose={handleOnClose}
             >
                 <DeletionRestorer>{(handleRestore, {restorable, deletedItem}) => (
                     <MenuItem
                         className={classNames({[styles.disabled]: !restorable})}
-                        onClick={props.onRestoreOption(handleRestore)}
+                        onClick={onRestoreOption(handleRestore)}
                         menuRef={restoreRef}
                         onParentKeyPress={handleKeyPressOpenMenu}
                         isDisabled={!restorable}
                     >
-                        {props.restoreOptionMessage(deletedItem)}
+                        {restoreOptionMessage(deletedItem)}
                     </MenuItem>
                 )}</DeletionRestorer>
                 <MenuSection>

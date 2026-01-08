@@ -20,23 +20,6 @@ const fileMenu = defineMessage({
     description: 'ARIA label for file menu'
 });
 
-/**
- * File menu dropdown in the menu bar.
- * @param {object} props
- * @param {import('react-intl').IntlShape} props.intl - React Intl object.
- * @param {boolean} props.isRtl - Whether layout is right-to-left.
- * @param {boolean} props.canSave - Whether saving is allowed.
- * @param {boolean} props.canCreateCopy - Whether creating a copy is allowed.
- * @param {boolean} props.canRemix - Whether remixing is allowed.
- * @param {() => void} props.onClickNew - Handler for creating a new project.
- * @param {() => void} props.onClickSave - Handler for saving the project.
- * @param {() => void} props.onClickSaveAsCopy - Handler for saving a copy.
- * @param {() => void} props.onClickRemix - Handler for remixing.
- * @param {() => void} props.onStartSelectingFileUpload - Handler for loading from computer.
- * @param {(downloadCb: () => void) => () => void} props.getSaveToComputerHandler
- *   - Returns a click handler that triggers project download.
- * @returns {React.ReactElement}
- */
 const FileMenu = props => {
     const {
         intl,
