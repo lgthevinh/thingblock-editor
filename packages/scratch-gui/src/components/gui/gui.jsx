@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import omit from 'lodash.omit';
 import PropTypes from 'prop-types';
 import React, {useEffect, useCallback} from 'react';
-import {FormattedMessage, useIntl} from 'react-intl';
+import {defineMessages, FormattedMessage, useIntl} from 'react-intl';
 import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
@@ -47,6 +47,64 @@ import {setPlatform} from '../../reducers/platform.js';
 import {setTheme} from '../../reducers/settings.js';
 import {PLATFORM} from '../../lib/platform.js';
 import {MenuRefProvider} from '../../contexts/menu-ref-context.jsx';
+
+const ariaMessages = defineMessages({
+    menuBar: {
+        id: 'gui.aria.menuBar',
+        defaultMessage: 'Menu topbar',
+        description: 'ARIA label for the top menu bar'
+    },
+    editor: {
+        id: 'gui.aria.editor',
+        defaultMessage: 'Editor',
+        description: 'ARIA label for the main editor area'
+    },
+    tabList: {
+        id: 'gui.aria.tabList',
+        defaultMessage: 'Tab list',
+        description: 'ARIA label for the editor tab list'
+    },
+    codePanel: {
+        id: 'gui.aria.codePanel',
+        defaultMessage: 'Code editor panel',
+        description: 'ARIA label for the code editor panel'
+    },
+    costumesPanel: {
+        id: 'gui.aria.costumesPanel',
+        defaultMessage: 'Costumes editor panel',
+        description: 'ARIA label for the costumes editor panel'
+    },
+    backdropsPanel: {
+        id: 'gui.aria.backdropsPanel',
+        defaultMessage: 'Backdrops editor panel',
+        description: 'ARIA label for the backdrops editor panel'
+    },
+    soundsPanel: {
+        id: 'gui.aria.soundsPanel',
+        defaultMessage: 'Sounds editor panel',
+        description: 'ARIA label for the sounds editor panel'
+    },
+    backpack: {
+        id: 'gui.aria.backpack',
+        defaultMessage: 'Backpack',
+        description: 'ARIA label for the backpack'
+    },
+    stageAndTarget: {
+        id: 'gui.aria.stageAndTarget',
+        defaultMessage: 'Stage and target',
+        description: 'ARIA label for stage and target area'
+    },
+    stage: {
+        id: 'gui.aria.stage',
+        defaultMessage: 'Stage',
+        description: 'ARIA label for the stage'
+    },
+    targetPane: {
+        id: 'gui.aria.targetPane',
+        defaultMessage: 'Target pane',
+        description: 'ARIA label for the target pane'
+    }
+});
 
 // Cache this value to only retrieve it once the first time.
 // Assume that it doesn't change for a session.
@@ -276,7 +334,7 @@ const GUIComponent = props => {
                 {!menuBarHidden && <MenuRefProvider>
                     <MenuBar
                         ariaRole="banner"
-                        ariaLabel="Menu topbar"
+                        ariaLabel={intl.formatMessage(ariaMessages.menuBar)}
                         accountNavOpen={accountNavOpen}
                         authorId={authorId}
                         authorThumbnailUrl={authorThumbnailUrl}
@@ -320,8 +378,9 @@ const GUIComponent = props => {
                 <Box className={classNames(boxStyles, styles.flexWrapper)}>
                     <Box
                         role="main"
-                        aria-label="Editor"
+                        aria-label={intl.formatMessage(ariaMessages.editor)}
                         className={styles.editorWrapper}
+                        element="main"
                     >
                         <Tabs
                             forceRenderTabPanel
@@ -344,10 +403,17 @@ const GUIComponent = props => {
                         >
                             <Box
                                 role="region"
-                                aria-label="Tab List"
+                                aria-label={intl.formatMessage(ariaMessages.tabList)}
                             >
-                                <TabList className={tabClassNames.tabList}>
-                                    <Tab className={tabClassNames.tab}>
+                                <TabList
+                                    className={tabClassNames.tabList}
+                                    role="tablist"
+                                >
+                                    <Tab
+                                        className={tabClassNames.tab}
+                                        tabIndex="0"
+                                        role="tab"
+                                    >
                                         <img
                                             draggable={false}
                                             src={codeIcon}
@@ -361,6 +427,8 @@ const GUIComponent = props => {
                                     <Tab
                                         className={tabClassNames.tab}
                                         onClick={onActivateCostumesTab}
+                                        role="tab"
+                                        tabIndex="0"
                                     >
                                         <img
                                             draggable={false}
@@ -383,6 +451,8 @@ const GUIComponent = props => {
                                     <Tab
                                         className={tabClassNames.tab}
                                         onClick={onActivateSoundsTab}
+                                        role="tab"
+                                        tabIndex="0"
                                     >
                                         <img
                                             draggable={false}
@@ -396,11 +466,15 @@ const GUIComponent = props => {
                                     </Tab>
                                 </TabList>
                             </Box>
-                            <TabPanel className={tabClassNames.tabPanel}>
+                            <TabPanel
+                                className={tabClassNames.tabPanel}
+                                role="tabpanel"
+                            >
                                 <Box
                                     className={styles.blocksWrapper}
                                     role="region"
-                                    aria-label="Code Editor Panel"
+                                    aria-label={intl.formatMessage(ariaMessages.codePanel)}
+                                    element="section"
                                 >
                                     <Blocks
                                         key={`${blocksId}/${colorMode}/${theme}`}
@@ -429,19 +503,26 @@ const GUIComponent = props => {
                                     <Watermark />
                                 </Box>
                             </TabPanel>
-                            <TabPanel className={tabClassNames.tabPanel}>
+                            <TabPanel
+                                className={tabClassNames.tabPanel}
+                                role="tabpanel"
+                            >
                                 {costumesTabVisible ? <CostumeTab
-                                    ariaLabel={targetIsStage ? 'Backdrops Editor Panel' : 'Costumes Editor Panel'}
+                                    ariaLabel={targetIsStage ? intl.formatMessage(ariaMessages.backdropsPanel) :
+                                        intl.formatMessage(ariaMessages.costumesPanel)}
                                     ariaRole="region"
                                     vm={vm}
                                     onNewLibraryBackdropClick={onNewLibraryBackdropClick}
                                     onNewLibraryCostumeClick={onNewLibraryCostumeClick}
                                 /> : null}
                             </TabPanel>
-                            <TabPanel className={tabClassNames.tabPanel}>
+                            <TabPanel
+                                className={tabClassNames.tabPanel}
+                                role="tabpanel"
+                            >
                                 {soundsTabVisible ?
                                     <SoundTab
-                                        ariaLabel="Sounds Editor Panel"
+                                        ariaLabel={intl.formatMessage(ariaMessages.soundsPanel)}
                                         ariaRole="region"
                                         vm={vm}
                                     /> : null}
@@ -451,15 +532,16 @@ const GUIComponent = props => {
                             <Backpack
                                 host={backpackHost}
                                 ariaRole="region"
-                                ariaLabel="Backpack"
+                                ariaLabel={intl.formatMessage(ariaMessages.backpack)}
                             />
                         ) : null}
                     </Box>
 
                     <Box
                         role="complementary"
-                        aria-label="Stage and Target"
+                        aria-label={intl.formatMessage(ariaMessages.stageAndTarget)}
                         className={classNames(styles.stageAndTargetWrapper, styles[stageSize])}
+                        element="aside"
                     >
                         <StageWrapper
                             isFullScreen={isFullScreen}
@@ -468,12 +550,13 @@ const GUIComponent = props => {
                             stageSize={stageSize}
                             vm={vm}
                             ariaRole="region"
-                            ariaLabel="Stage"
+                            ariaLabel={intl.formatMessage(ariaMessages.stage)}
                         />
                         <Box
                             className={styles.targetWrapper}
                             role="region"
-                            aria-label="Target Pane"
+                            aria-label={intl.formatMessage(ariaMessages.targetPane)}
+                            element="section"
                         >
                             <TargetPane
                                 stageSize={stageSize}
