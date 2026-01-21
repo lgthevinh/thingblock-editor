@@ -41,12 +41,6 @@ const LanguageMenu = ({
         defaultIndexOnOpen: (Object.keys(locales).indexOf(currentLocale))
     });
 
-    useEffect(() => {
-        if (isExpanded()) {
-            selectedRef.current.scrollIntoView({block: 'center'});
-        }
-    }, [selectedRef, isExpanded]);
-
     const setRef = useCallback(component => {
         selectedRef.current = component;
     }, []);
