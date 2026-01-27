@@ -14,6 +14,7 @@ import styles from './direction-picker.css';
 import allAroundIcon from './icon--all-around.svg';
 import leftRightIcon from './icon--left-right.svg';
 import dontRotateIcon from './icon--dont-rotate.svg';
+import useFocusOutside from '../../hooks/useFocusOutside.js';
 
 const BufferedInput = BufferedInputHOC(Input);
 
@@ -51,15 +52,19 @@ const messages = defineMessages({
 
 const DirectionPicker = props => {
     const intl = useIntl();
+
+    const {containerRef, popoverRef} = useFocusOutside(props.onClosePopover);
+
     return (
         <Label
             secondary
             above={props.labelAbove}
             text={directionLabel}
+            ref={containerRef}
         >
             <Popover
                 body={
-                    <div>
+                    <div ref={popoverRef}>
                         <Dial
                             direction={props.direction}
                             onChange={props.onChangeDirection}

@@ -1,9 +1,16 @@
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
+import {defineMessage, useIntl} from 'react-intl';
 
 import greenFlagIcon from './icon--green-flag.svg';
 import styles from './green-flag.css';
+
+const startProjectMessage = defineMessage({
+    id: 'gui.aria.startProjectButton',
+    defaultMessage: 'Start project',
+    description: 'accessibility label for start project button'
+});
 
 const GreenFlagComponent = function (props) {
     const {
@@ -11,13 +18,18 @@ const GreenFlagComponent = function (props) {
         className,
         onClick,
         title,
+        isFullScreen,
         ...componentProps
     } = props;
+
+    const intl = useIntl();
     return (
         <button
             className={styles.greenFlagButton}
             onClick={onClick}
             {...componentProps}
+            aria-label={intl.formatMessage(startProjectMessage)}
+            {...(isFullScreen ? {'data-focusable': true} : {})}
         >
             <img
                 className={classNames(
@@ -35,6 +47,7 @@ const GreenFlagComponent = function (props) {
     );
 };
 GreenFlagComponent.propTypes = {
+    isFullScreen: PropTypes.bool,
     active: PropTypes.bool,
     className: PropTypes.string,
     onClick: PropTypes.func.isRequired,

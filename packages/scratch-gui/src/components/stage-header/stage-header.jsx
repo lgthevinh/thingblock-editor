@@ -1,6 +1,6 @@
 import {FormattedMessage, defineMessages, useIntl} from 'react-intl';
 import PropTypes from 'prop-types';
-import React, {useCallback} from 'react';
+import React, {useCallback, useContext, useLayoutEffect} from 'react';
 import {connect} from 'react-redux';
 import VM from '@scratch/scratch-vm';
 
@@ -21,6 +21,7 @@ import styles from './stage-header.css';
 import {storeProjectThumbnail} from '../../lib/store-project-thumbnail.js';
 import dataURItoBlob from '../../lib/data-uri-to-blob.js';
 import throttle from 'lodash.throttle';
+import {ModalFocusContext} from '../../contexts/modal-focus-context.jsx';
 
 const messages = defineMessages({
     largeStageSizeMessage: {
@@ -73,6 +74,23 @@ const StageHeaderComponent = function (props) {
     } = props;
     const intl = useIntl();
 
+    const {
+        captureFocus,
+        restoreFocus,
+        restrictFocusableElements,
+        unrestrictFocusableElements
+    } = useContext(ModalFocusContext);
+
+    useLayoutEffect(() => {
+        if (isFullScreen) {
+            captureFocus();
+            restrictFocusableElements();
+        } else {
+            unrestrictFocusableElements();
+            restoreFocus();
+        }
+    }, [isFullScreen]);
+
     let header = null;
 
     const onUpdateThumbnail = useCallback(
@@ -112,6 +130,8 @@ const StageHeaderComponent = function (props) {
                     className={styles.stageButton}
                     onClick={onSetStageUnFull}
                     onKeyPress={onKeyPress}
+                    aria-label={intl.formatMessage(messages.unFullStageSizeMessage)}
+                    data-focusable
                 >
                     <img
                         alt={intl.formatMessage(messages.unFullStageSizeMessage)}
@@ -129,7 +149,10 @@ const StageHeaderComponent = function (props) {
                     className={styles.stageMenuWrapper}
                     style={{width: stageDimensions.width}}
                 >
-                    <Controls vm={vm} />
+                    <Controls
+                        isFullScreen={isFullScreen}
+                        vm={vm}
+                    />
                     {stageButton}
                 </Box>
             </Box>
@@ -163,7 +186,10 @@ const StageHeaderComponent = function (props) {
         header = (
             <Box className={styles.stageHeaderWrapper}>
                 <Box className={styles.stageMenuWrapper}>
-                    <Controls vm={vm} />
+                    <Controls
+                        isFullScreen={isFullScreen}
+                        vm={vm}
+                    />
                     <div className={styles.stageSizeRow}>
                         {stageControls}
                         <div className={styles.rightSection}>
@@ -179,6 +205,7 @@ const StageHeaderComponent = function (props) {
                             <Button
                                 className={styles.stageButton}
                                 onClick={onSetStageFull}
+                                aria-label={intl.formatMessage(messages.fullStageSizeMessage)}
                             >
                                 <img
                                     alt={intl.formatMessage(messages.fullStageSizeMessage)}
