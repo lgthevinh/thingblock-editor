@@ -37,6 +37,10 @@ const ActionMenu = ({
         }, CLOSE_DELAY);
     }, []);
 
+    useEffect(() => {
+        console.log("isExpanded changed to " + isExpanded);
+    }, [isExpanded]);
+
     const handleToggleOpenState = useCallback(() => {
         // Mouse enter back in after timeout was started prevents it from closing.
         
@@ -44,6 +48,7 @@ const ActionMenu = ({
             clearTimeout(closeTimeoutRef.current);
             closeTimeoutRef.current = null;
         } else if (!isExpanded) {
+            console.log("we do set it as expanded though");
             setIsExpanded(true);
             setForceHide(false);
         }
@@ -87,19 +92,10 @@ const ActionMenu = ({
             }
         };
 
-        const handleFocusIn = e => {
-            if (containerRef.current && !containerRef.current.contains(e.target)) {
-                console.log("collapse handle focus in");
-                setIsExpanded(false);
-            }
-        };
-
-        document.addEventListener('touchstart', handleTouchOutside);
-        document.addEventListener('focusin', handleFocusIn);
+        document.addEventListener('mousedown', handleTouchOutside);
 
         return () => {
-            document.removeEventListener('touchstart', handleTouchOutside);
-            document.removeEventListener('focusin', handleFocusIn);
+            document.removeEventListener('mousedown', handleTouchOutside);
         };
     }, [containerRef, setIsExpanded]);
 

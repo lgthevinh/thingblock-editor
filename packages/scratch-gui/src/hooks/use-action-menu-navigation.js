@@ -1,5 +1,6 @@
 import {useCallback, useState, useRef} from 'react';
 import {KEY} from '../lib/navigation-keys';
+import ReactTooltip from 'react-tooltip';
 
 const MENU_ITEM_SELECTOR = '[data-action-menu-item="true"]';
 
@@ -18,16 +19,15 @@ export default function useActionMenuNavigation () {
         while (children.length > 0) {
             // if child is a menu item itself
             const element = children.shift();
-            if (element.matches(MENU_ITEM_SELECTOR) && element !== buttonRef.current) {
+            if (element.matches(MENU_ITEM_SELECTOR)) {
                 subitems.push(element);
             } else {
                 children.push(...element.children);
             }
         }
 
-        console.log(subitems);
         return subitems;
-    }, [containerRef, buttonRef]);
+    }, [containerRef]);
 
     const focusItem = useCallback(item => {
         if (item) {
@@ -36,13 +36,14 @@ export default function useActionMenuNavigation () {
     }, []);
 
     const handleOnFocus = useCallback(() => {
-        console.log("Should expand");
         setIsExpanded(true);
         const items = findSubitems();
         if (!items.length) return;
 
-        focusItem(items[0]);
-    }, [findSubitems, focusItem]);
+        // default to last item (first above)
+        const lastItem = items[items.length - 1];
+        focusItem(lastItem);
+    }, [findSubitems, focusItem, setIsExpanded]);
 
     const handleMove = useCallback(direction => {
         const items = findSubitems();
@@ -66,13 +67,12 @@ export default function useActionMenuNavigation () {
             handleMove(-1);
             break;
         case KEY.TAB:
-            console.log("Should collapse");
             if (isExpanded) setIsExpanded(false);
             buttonRef?.current?.blur();
 
             return;
         }
-    }, [handleMove, setIsExpanded, buttonRef]);
+    }, [handleMove, isExpanded, setIsExpanded, buttonRef]);
 
     return {
         containerRef,
