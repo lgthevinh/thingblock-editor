@@ -31,15 +31,10 @@ const ActionMenu = ({
 
     const handleClosePopover = useCallback(() => {
         closeTimeoutRef.current = setTimeout(() => {
-            console.log("collapse popover");
             setIsExpanded(false);
             closeTimeoutRef.current = null;
         }, CLOSE_DELAY);
     }, []);
-
-    useEffect(() => {
-        console.log("isExpanded changed to " + isExpanded);
-    }, [isExpanded]);
 
     const handleToggleOpenState = useCallback(() => {
         // Mouse enter back in after timeout was started prevents it from closing.
@@ -48,7 +43,6 @@ const ActionMenu = ({
             clearTimeout(closeTimeoutRef.current);
             closeTimeoutRef.current = null;
         } else if (!isExpanded) {
-            console.log("we do set it as expanded though");
             setIsExpanded(true);
             setForceHide(false);
         }
@@ -66,7 +60,6 @@ const ActionMenu = ({
             // This prevents keyboard events from triggering the button
             buttonRef.current?.blur();
             setForceHide(true);
-            console.log("collapse click delayer");
             setIsExpanded(false);
             setTimeout(() => setForceHide(false), 0);
         }),
@@ -80,32 +73,12 @@ const ActionMenu = ({
             handleToggleOpenState();
         }
     }, [isExpanded, handleToggleOpenState]);
-
-    // Handle clicks/touches outside to close menu
-    useEffect(() => {
-        const handleTouchOutside = e => {
-            console.log("is touch out");
-            if (containerRef.current && !containerRef.current.contains(e.target)) {
-                console.log("collapse handle touch outside");
-                setIsExpanded(false);
-                ReactTooltip.hide();
-            }
-        };
-
-        document.addEventListener('mousedown', handleTouchOutside);
-
-        return () => {
-            document.removeEventListener('mousedown', handleTouchOutside);
-        };
-    }, [containerRef, setIsExpanded]);
-
+    
     useEffect(() => {
         const buttonEl = buttonRef.current;
-
         if (!buttonEl) return;
 
         buttonEl.addEventListener('touchstart', handleTouchStart);
-
         return () => {
             buttonEl.removeEventListener('touchstart', handleTouchStart);
         };

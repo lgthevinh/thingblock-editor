@@ -1,13 +1,46 @@
-import {useCallback, useState, useRef} from 'react';
+import {useCallback, useState, useRef, useEffect} from 'react';
 import {KEY} from '../lib/navigation-keys';
 import ReactTooltip from 'react-tooltip';
 
 const MENU_ITEM_SELECTOR = '[data-action-menu-item="true"]';
 
-export default function useActionMenuNavigation () {
+/**
+ * Custom hook to handle keyboard and focus navigation for an action menu.
+ * Supports focusing menu items, navigating with arrow keys, and closing the menu on outside clicks.
+ * Also provides refs for the menu container and the main button.
+ * @param {object} [options] - Optional configuration object.
+ * @param {number|null} [options.defaultItemIndex] - The index of the menu item to focus by default when
+ * the menu receives focus. If `null`, the last menu item will be focused.
+ * @returns {object} Navigation helpers and refs for use in an action menu component.
+ * - containerRef - Ref to the container element that holds all menu items.
+ * - buttonRef - Ref to the main action button.
+ * - isExpanded - Current expanded state of the menu.
+ * - setIsExpanded - Setter to manually expand/collapse the menu.
+ * - handleKeyDown - Keydown handler to navigate through menu items with arrow keys and handle tab.
+ * - handleOnFocus - Focus handler to expand the menu and focus the default item.
+ */
+export default function useActionMenuNavigation (
+    {defaultItemIndex = null} = {}
+) {
     const containerRef = useRef(null);
     const buttonRef = useRef(null);
     const [isExpanded, setIsExpanded] = useState(false);
+
+    // Handle clicks/touches outside to close menu
+    useEffect(() => {
+        const handleTouchOutside = e => {
+            if (containerRef.current && !containerRef.current.contains(e.target)) {
+                setIsExpanded(false);
+                ReactTooltip.hide();
+            }
+        };
+
+        document.addEventListener('mousedown', handleTouchOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleTouchOutside);
+        };
+    }, [containerRef, setIsExpanded]);
+
 
     // BFS to find first children with attribute
     const findSubitems = useCallback(() => {
@@ -41,8 +74,9 @@ export default function useActionMenuNavigation () {
         if (!items.length) return;
 
         // default to last item (first above)
-        const lastItem = items[items.length - 1];
-        focusItem(lastItem);
+        const defaultItem = items[defaultItemIndex] ?? items[items.length - 1];
+        focusItem(defaultItem);
+        // TODO: refresh tooltip so it repositions correctly
     }, [findSubitems, focusItem, setIsExpanded]);
 
     const handleMove = useCallback(direction => {
