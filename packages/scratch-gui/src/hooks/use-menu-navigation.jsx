@@ -133,10 +133,37 @@ export default function useMenuNavigation ({
         });
     }, [menuContext, menuRef, depth, defaultIndexOnOpen]);
 
-    const handleOnClose = useCallback(() => {
-        menuContext.closeMenuByRef(menuRef);
-        menuRef?.current?.focus();
+    /**
+     * Closes the menu and restores focus to the appropriate element.
+     * - If the menuRef is a wrapper (data-menu-item-wrapper), tries to focus its direct child
+     *   with data-menu-item (usually the button that opened the submenu).
+     * - Otherwise, focuses the wrapper itself (if focusable).
+     * This ensures keyboard users return to the correct menu trigger after closing a submenu.
+     */
+    const handleOnClose = useCallback(menuRefToClose => {
+        const ref = menuRefToClose || menuRef;
+        menuContext.closeMenuByRef(ref);
+        const wrapper = ref?.current;
+
+        // If wrapper, try to focus the direct menu trigger button
+        if (wrapper && wrapper.matches(MENU_ITEM_WRAPPER_SELECTOR)) {
+            const directChild = Array.from(wrapper.children).find(child =>
+                child.matches && child.matches(MENU_ITEM_SELECTOR)
+            );
+            if (directChild) {
+                directChild.focus();
+                return;
+            }
+        }
+        
+        // Fallback: focus wrapper itself if possible
+        wrapper?.focus();
     }, [menuContext, menuRef]);
+
+    const handleOnCloseAllMenus = useCallback(() => {
+        handleOnClose(menuContext.outermostMenu);
+        menuContext.closeAllMenus();
+    }, [handleOnClose, menuContext]);
 
     const handleMove = useCallback(direction => {
         const items = findDirectSubitemsFocusable();
@@ -179,14 +206,16 @@ export default function useMenuNavigation ({
                 }
                 break;
             }
+        case KEY.TAB:
+            handleOnCloseAllMenus();
+            break;
         }
 
-    }, [handleMove, handleOnClose]);
+    }, [handleMove, handleOnClose, handleOnCloseAllMenus]);
 
     const handleKeyDown = useCallback(e => {
         if (isExpanded() && e.key === KEY.TAB) {
-            handleOnClose();
-            menuContext.closeAllMenus();
+            handleOnCloseAllMenus();
             return;
         }
 

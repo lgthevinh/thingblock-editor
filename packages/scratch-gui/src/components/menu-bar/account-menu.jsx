@@ -54,24 +54,23 @@ const AccountMenu = ({
     });
 
     return (
-        <button
-            className={classNames(
-                stylesMenuBar.accountInfoGroup,
-                stylesAccountMenu.accountMenu
-            )}
+        <div
+            data-menu-item-wrapper
+            className={stylesAccountMenu.accountMenu}
             ref={menuRef}
-            onKeyDown={handleKeyDown}
-            onClick={handleOnOpen}
-            aria-label={intl.formatMessage(accountMenu)}
-            aria-expanded={isExpanded()}
         >
-            <div
+            <button
+                onClick={handleOnOpen}
+                onKeyDown={handleKeyDown}
+                data-menu-item
                 className={classNames(
                     stylesAccountMenu.userInfo,
                     stylesMenuBar.menuBarItem,
                     stylesMenuBar.hoverable,
                     {[stylesMenuBar.active]: isExpanded()}
                 )}
+                aria-label={intl.formatMessage(accountMenu)}
+                aria-expanded={isExpanded()}
             >
                 {avatarUrl ? (
                     <UserAvatar
@@ -88,7 +87,7 @@ const AccountMenu = ({
                     {/* TODO: consider reapplying stylesMenuBar.dropdownCaretIcon */}
                     <img src={dropdownCaret} />
                 </div>
-            </div>
+            </button>
             <MenuBarMenu
                 className={classNames(stylesMenuBar.menuBarMenu)}
                 open={isExpanded()}
@@ -183,7 +182,7 @@ const AccountMenu = ({
                     </MenuSection>
                 ) : null}
             </MenuBarMenu>
-        </button>
+        </div>
     );
 };
 

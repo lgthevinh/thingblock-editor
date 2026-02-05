@@ -89,6 +89,11 @@ const ariaMessages = defineMessages({
         id: 'gui.menuBar.home',
         defaultMessage: 'Home',
         description: 'accessibility text for the home button'
+    },
+    myStuff: {
+        id: 'gui.menuBar.myStuff',
+        defaultMessage: 'My Stuff',
+        description: 'accessibility text for the my stuff button'
     }
 });
 
@@ -490,7 +495,10 @@ class MenuBar extends React.Component {
                             // ************ user is logged in ************
                             <React.Fragment>
                                 {menuOpts.myStuffUrl ? (
-                                    <a href={menuOpts.myStuffUrl}>
+                                    <a
+                                        href={menuOpts.myStuffUrl}
+                                        aria-label={this.props.intl.formatMessage(ariaMessages.myStuff)}
+                                    >
                                         <div
                                             className={classNames(
                                                 styles.menuBarItem,
