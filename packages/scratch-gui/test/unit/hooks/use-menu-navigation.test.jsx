@@ -1,5 +1,5 @@
 import {renderHook} from '@testing-library/react';
-import useMenuNavigation from '../../../src/hooks/use-menu-navigation';
+import useMenuNavigation from '../../../src/hooks/use-menu-navigation.jsx';
 import {MenuRefContext} from '../../../src/contexts/menu-ref-context';
 import {KEY} from '../../../src/lib/navigation-keys';
 import React from 'react';
@@ -301,7 +301,7 @@ describe('useMenuNavigation', () => {
         expect(wrapperFocusSpy).toHaveBeenCalled();
     });
 
-    test('ENTER, SPACE and ARROW_RIGHT don"t interact with the button', () => {
+    test("ENTER, SPACE and ARROW_RIGHT don't interact with the button", () => {
         const wrapperDiv = document.createElement('div');
         wrapperDiv.setAttribute('tabIndex', '-1');
         wrapperDiv.setAttribute('data-menu-item-wrapper', 'true');

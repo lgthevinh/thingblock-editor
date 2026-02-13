@@ -220,8 +220,8 @@ describe('Menu bar keyboard navigation', () => {
         expect(await activeElement2.getText()).toBe('Language');
 
         await clickKey(Key.ARROW_DOWN);
-        const activateElement3 = await driver.switchTo().activeElement();
-        expect(await activateElement3.getText()).toBe('Color Mode');
+        const activeElement3 = await driver.switchTo().activeElement();
+        expect(await activeElement3.getText()).toBe('Color Mode');
 
         await clickKey(Key.ENTER);
         const activeElement4 = await driver.switchTo().activeElement();
