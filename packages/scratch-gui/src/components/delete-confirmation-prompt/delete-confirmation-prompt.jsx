@@ -100,6 +100,11 @@ const DeleteConfirmationPrompt = ({
 
     return (<ReactModal
         isOpen
+        onAfterOpen={() => {
+            if (yesButtonRef.current) {
+                yesButtonRef.current.focus();
+            }
+        }}
         // We have to inline the styles, since a part
         // of them are dynamically generated
         style={{
