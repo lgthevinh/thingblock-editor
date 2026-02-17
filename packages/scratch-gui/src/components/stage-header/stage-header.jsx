@@ -106,10 +106,6 @@ const StageHeaderComponent = function (props) {
         [projectId, onUpdateProjectThumbnail]
     );
 
-    const componentRef = useCallback(el => {
-        containerRef.current = el;
-    }, []);
-
     if (isFullScreen) {
         const stageDimensions = getStageDimensions(null, true);
         const stageButton = showBranding ? (
@@ -147,7 +143,7 @@ const StageHeaderComponent = function (props) {
         header = (
             <Box
                 className={styles.stageHeaderWrapperOverlay}
-                componentRef={componentRef}
+                componentRef={containerRef}
             >
                 <Box
                     className={styles.stageMenuWrapper}

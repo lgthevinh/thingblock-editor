@@ -4,7 +4,7 @@ import {KEY} from '../lib/navigation-keys';
 /**
  * Hook to trap focus within a container element.
  * @param {{current: HTMLElement}} containerRef - Parent container ref
- * @param {string} dataAttribute - Data attribute used to mark focusable elements (default: 'data-focusable')
+ * @param {string} dataAttribute - Data attribute used to mark focusable elements
  * @returns {{trapFocus: () => void, releaseFocus: () => void}} - Functions to activate and deactivate the focus trap
  */
 const useFocusTrap = (containerRef, dataAttribute) => {
@@ -52,7 +52,7 @@ const useFocusTrap = (containerRef, dataAttribute) => {
         if (!container) return;
 
         document.addEventListener('keydown', handleKeyDown);
-    }, [handleKeyDown, getFocusableElements]);
+    }, [handleKeyDown]);
 
     const releaseFocus = useCallback(() => {
         document.removeEventListener('keydown', handleKeyDown);
