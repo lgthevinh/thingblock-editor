@@ -78,15 +78,15 @@ const StageHeaderComponent = function (props) {
     const containerRef = useRef(null);
     const {trapFocus, releaseFocus} = useFocusTrap(containerRef, 'data-focusable');
 
-    useLayoutEffect(() => {
-        if (isFullScreen) {
-            trapFocus();
-        } else {
-            releaseFocus();
-        }
+    const handleEnterFullScreen = useCallback(() => {
+        onSetStageFull();
+        trapFocus();
+    }, [onSetStageFull, trapFocus]);
 
-        return releaseFocus;
-    }, [isFullScreen, trapFocus, releaseFocus]);
+    const handleExitFullScreen = useCallback(() => {
+        onSetStageUnFull();
+        releaseFocus();
+    }, [onSetStageUnFull, releaseFocus]);
 
     let header = null;
 
@@ -114,6 +114,7 @@ const StageHeaderComponent = function (props) {
                     href="https://scratch.mit.edu"
                     rel="noopener noreferrer"
                     target="_blank"
+                    data-focusable
                 >
                     <img
                         alt="Scratch"
@@ -125,7 +126,7 @@ const StageHeaderComponent = function (props) {
             <div className={styles.unselectWrapper}>
                 <Button
                     className={styles.stageButton}
-                    onClick={onSetStageUnFull}
+                    onClick={handleExitFullScreen}
                     onKeyPress={onKeyPress}
                     aria-label={intl.formatMessage(messages.unFullStageSizeMessage)}
                     data-focusable
@@ -204,7 +205,7 @@ const StageHeaderComponent = function (props) {
                             )}
                             <Button
                                 className={styles.stageButton}
-                                onClick={onSetStageFull}
+                                onClick={handleEnterFullScreen}
                                 aria-label={intl.formatMessage(messages.fullStageSizeMessage)}
                             >
                                 <img
