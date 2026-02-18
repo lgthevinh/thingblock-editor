@@ -14,7 +14,7 @@ const useFocusTrap = (containerRef, dataAttribute) => {
 
         return Array.from(
             container.querySelectorAll(`[${dataAttribute}]`)
-        ).filter(el => !el.disabled && el.offsetParent !== null);
+        ).filter(el => !el.disabled);
     }, [containerRef, dataAttribute]);
 
     const handleKeyDown = useCallback(event => {
