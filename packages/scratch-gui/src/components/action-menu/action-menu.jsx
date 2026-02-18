@@ -37,7 +37,7 @@ const ActionMenu = ({
     }, [isExpanded]);
 
     const handleTouchStart = useCallback(e => {
-    // Prevent this touch from becoming a click if menu is closed
+        // Prevent this touch from becoming a click if menu is closed
         if (!isExpanded) {
             e.preventDefault();
             handleToggleOpenState();
@@ -90,7 +90,7 @@ const ActionMenu = ({
     }, [itemRefs, focusItem]);
 
     const handleKeyDown = useCallback(e => {
-        if (e.key === KEY.ARROW_DOWN || e.key === KEY.ARROW_UP) {
+        if ((e.key === KEY.ARROW_DOWN || e.key === KEY.ARROW_UP) && isExpanded) {
             e.preventDefault();
             const direction = e.key === KEY.ARROW_UP ? -1 : 1;
             handleMove(direction);
