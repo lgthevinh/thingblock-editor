@@ -115,29 +115,20 @@ const ActionMenu = ({
         if (isExpanded && items.length) {
             const timer = setTimeout(() => {
                 // blur and refocus in order to recalculate tooltip position upon expansion
-                if (items[currentFocusedIndex]) items[currentFocusedIndex].blur();
-                focusItem(items[currentFocusedIndex]);
+                if (items[currentFocusedIndex]) {
+                    setIsExpanded(true);
+                    items[currentFocusedIndex].blur();
+                    focusItem(items[currentFocusedIndex]);
+                }
             }, CLOSE_DELAY);
             return () => clearTimeout(timer);
         }
     }, [isExpanded, focusItem, itemRefs.current.length]);
 
-    const clickDelayer = useCallback(
-        // Return a wrapped action that manages the menu closing.
-        // @todo we may be able to use react-transition for this in the future
-        // for now all this work is to ensure the menu closes BEFORE the
-        // (possibly slow) action is started.
+    const clickEvent = useCallback(
         fn => (event => {
-            ReactTooltip.hide();
             if (fn) fn(event);
-            // Blur the button so it does not keep focus after being clicked
-            // This prevents keyboard events from triggering the button
-            buttonRef.current?.blur();
-            setForceHide(true);
-            setIsExpanded(false);
-            setTimeout(() => setForceHide(false), 0);
-        }),
-        []
+        }), []
     );
 
     return (
@@ -158,7 +149,7 @@ const ActionMenu = ({
                 className={classNames(styles.button, styles.mainButton)}
                 data-for={mainTooltipId}
                 data-tip={mainTitle}
-                onClick={clickDelayer(onClick)}
+                onClick={clickEvent(onClick)}
                 ref={buttonRef}
             >
                 <img
@@ -201,7 +192,7 @@ const ActionMenu = ({
                                         })}
                                         data-for={tooltipId}
                                         data-tip={title}
-                                        onClick={hasFileInput ? handleClick : clickDelayer(handleClick)}
+                                        onClick={hasFileInput ? handleClick : clickEvent(handleClick)}
                                         tabIndex={-1}
                                         ref={el => {
                                             itemRefs.current[keyId] = el;
