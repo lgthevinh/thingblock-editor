@@ -24,14 +24,22 @@ const ActionMenu = ({
     const buttonRef = useRef(null);
     const itemRefs = useRef([]);
 
+    const focusItem = useCallback(item => {
+        if (item) {
+            item.focus();
+        }
+    }, []);
+
     const handleToggleOpenState = useCallback(() => {
         // Mouse enter back in after timeout was started prevents it from closing.
+        console.log('Opening ' + mainTitle);
         if (closeTimeoutRef.current) {
             clearTimeout(closeTimeoutRef.current);
             closeTimeoutRef.current = null;
         } else if (!isExpanded) {
             setIsExpanded(true);
             setForceHide(false);
+            focusItem(buttonRef.current);
         }
     }, [isExpanded]);
 
@@ -67,12 +75,6 @@ const ActionMenu = ({
             document.removeEventListener('touchstart', handleTouchOutside);
         };
     }, [containerRef, setIsExpanded]);
-
-    const focusItem = useCallback(item => {
-        if (item) {
-            item.focus();
-        }
-    }, []);
 
     const handleMove = useCallback(direction => {
         const items = itemRefs.current;
@@ -149,6 +151,18 @@ const ActionMenu = ({
         }
     }, [focusItem]);
 
+    const handleCoreButtonMouseEnter = useCallback(() => {
+        // Focus on buttonRef and unfocus inner menu without unexpanding
+        const items = itemRefs.current;
+        const currentFocusedIndex = items.indexOf(document.activeElement);
+        if (buttonRef.current === document.activeElement) return;
+
+        if (items[currentFocusedIndex]) {
+            items[currentFocusedIndex].blur();
+        }
+        focusItem(buttonRef.current);
+    }, [focusItem]);
+
     return (
         <div
             className={classNames(styles.menuContainer, className, {
@@ -169,6 +183,7 @@ const ActionMenu = ({
                 data-tip={mainTitle}
                 onClick={clickEvent(onClick)}
                 ref={buttonRef}
+                onMouseEnter={handleCoreButtonMouseEnter}
             >
                 <img
                     className={styles.mainIcon}
