@@ -5,18 +5,10 @@ import ActionMenu from '../../../src/components/action-menu/action-menu.jsx';
 import {KEY} from '../../../src/lib/navigation-keys';
 import React, {act} from 'react';
 
-/**
- * Wrap a callback in act and wait for a given time (ms) afterwards.
- * @param {() => void} callback - the function that triggers state updates
- * @param {number} waitTime - milliseconds to wait after act
- */
-export const actWithDelay = async (callback, waitTime = 200) => {
-    await act(async () => {
-        callback();
-        jest.advanceTimersByTime(waitTime);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-    });
-};
+// Mock the CSS module so class names exist
+jest.mock('../../../src/components/action-menu/action-menu.css', () => ({
+    expanded: 'expanded'
+}));
 
 describe('ActionMenu keyboard navigation', () => {
     const mockOnClick = jest.fn();
@@ -34,65 +26,62 @@ describe('ActionMenu keyboard navigation', () => {
     };
 
     beforeEach(() => {
-        jest.useFakeTimers();
         mockOnClick.mockClear();
         mockMoreButtonClick.mockClear();
     });
 
-    afterEach(() => {
-        jest.runOnlyPendingTimers();
-        jest.useRealTimers();
-    });
-
     test('focus + arrow_down opens menu and arrow_up cycles to last', () => {
         render(<ActionMenu {...defaultProps} />);
-        
         const mainButton = screen.getByRole('button', {name: 'Main Button'});
-        act(() => {
-            mainButton.focus();
-        });
 
         act(() => {
+            mainButton.focus();
             fireEvent.keyDown(mainButton, {key: KEY.ARROW_DOWN});
         });
+
         const firstItem = screen.getByRole('button', {name: 'Button 1'});
         expect(document.activeElement).toBe(firstItem);
 
         act(() => {
             fireEvent.keyDown(firstItem, {key: KEY.ARROW_UP});
         });
+
         const lastItem = screen.getByRole('button', {name: 'Button 3'});
         expect(document.activeElement).toBe(lastItem);
+
+        const menuContainer = mainButton.parentElement;
+        expect(menuContainer).toHaveClass('expanded');
     });
 
     test('escape closes menu and returns focus to main button', () => {
         render(<ActionMenu {...defaultProps} />);
-        
         const mainButton = screen.getByRole('button', {name: 'Main Button'});
+
         act(() => {
             mainButton.focus();
             fireEvent.keyDown(mainButton, {key: KEY.ARROW_DOWN});
         });
-        
+
         const firstItem = screen.getByRole('button', {name: 'Button 1'});
         expect(document.activeElement).toBe(firstItem);
 
         act(() => {
             fireEvent.keyDown(firstItem, {key: KEY.ESCAPE});
         });
+
         expect(document.activeElement).toBe(mainButton);
+        
+        const menuContainer = mainButton.parentElement;
+        expect(menuContainer).not.toHaveClass('expanded');
     });
 
     test('tab closes menu and focuses next element', async () => {
-        jest.useRealTimers();
-
         render(
             <>
                 <ActionMenu {...defaultProps} />
                 <button>After Menu</button>
             </>
         );
-
         const mainButton = screen.getByRole('button', {name: 'Main Button'});
         const afterButton = screen.getByRole('button', {name: 'After Menu'});
         const user = userEvent.setup();
@@ -107,12 +96,41 @@ describe('ActionMenu keyboard navigation', () => {
 
         await act(async () => {
             await user.tab();
+            // Wait 1 second for any menu close animations or timeouts
+            await new Promise(resolve => setTimeout(resolve, 1000));
         });
 
-        // Wait 1 second for any menu close animations or timeouts
-        await new Promise(resolve => setTimeout(resolve, 1000));
         expect(document.activeElement).toBe(afterButton);
+        const menuContainer = mainButton.parentElement;
+        expect(menuContainer).not.toHaveClass('expanded');
+    });
 
-        jest.useFakeTimers();
+    test('shift + tab closes menu and focuses previous element', async () => {
+        render(
+            <>
+                <button>Before Menu</button>
+                <ActionMenu {...defaultProps} />
+                <button>After Menu</button>
+            </>
+        );
+
+        const mainButton = screen.getByRole('button', {name: 'Main Button'});
+        const beforeButton = screen.getByRole('button', {name: 'Before Menu'});
+        const user = userEvent.setup();
+
+        act(() => {
+            mainButton.focus();
+        });
+
+        const menuContainer = mainButton.parentElement;
+        expect(menuContainer).toHaveClass('expanded');
+        await act(async () => {
+            await user.tab({shift: true});
+            // Wait 1 second for any menu close animations or timeouts
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        });
+        
+        expect(document.activeElement).toBe(beforeButton);
+        expect(menuContainer).not.toHaveClass('expanded');
     });
 });
