@@ -115,11 +115,6 @@ const ActionMenu = ({
             focusItem(buttonRef.current);
         } else if (e.key === KEY.ESCAPE) {
             focusItem(buttonRef.current);
-        } else if (e.key === KEY.ENTER) {
-            ReactTooltip.hide();
-            setIsExpanded(false);
-            setForceHide(true);
-            buttonRef.current.blur();
         }
     }, [handleMove, isExpanded, setIsExpanded]);
 
