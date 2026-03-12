@@ -30,10 +30,6 @@ import TurboMode from '../../containers/turbo-mode.jsx';
 import MenuBarHOC from '../../containers/menu-bar-hoc.jsx';
 import SettingsMenu from './settings-menu.jsx';
 
-
-import {GUIStoragePropType} from '../../gui-config';
-import {storeProjectThumbnail} from '../../lib/store-project-thumbnail';
-import dataURItoBlob from '../../lib/data-uri-to-blob';
 import {openTipsLibrary, openDebugModal} from '../../reducers/modals';
 import {setPlayer} from '../../reducers/mode';
 import {
@@ -193,7 +189,6 @@ class MenuBar extends React.Component {
             'handleClickRemix',
             'handleClickSave',
             'handleClickSaveAsCopy',
-            'handleClickUpdateThumbnail',
             'handleClickSeeCommunity',
             'handleClickShare',
             'handleSetMode',
@@ -235,26 +230,6 @@ class MenuBar extends React.Component {
     handleClickSaveAsCopy () {
         this.props.onClickSaveAsCopy();
         this.props.onRequestCloseFile();
-    }
-    handleClickUpdateThumbnail () {
-        const projectId = this.props.projectId?.toString();
-        console.log(`Project saved with id ${projectId}`);
-        console.log(this.props.onUpdateProjectThumbnail);
-        console.log(this.props.vm);
-        if (this.props.storage?.internalApiHost) {
-            console.log('Storage host:', this.props.storage.internalApiHost);
-        } else if (this.props.storage) {
-            console.log('Storage object keys:', Object.keys(this.props.storage));
-        }
-        if (!this.props.onUpdateProjectThumbnail) return;
-        storeProjectThumbnail(this.props.vm, dataURI => {
-            console.log('Updating thumbnail...');
-            this.props.onUpdateProjectThumbnail(
-                projectId,
-                dataURItoBlob(dataURI)
-            );
-            console.log('After dispatch');
-        });
     }
     handleClickSeeCommunity (waitForUpdate) {
         if (this.props.shouldSaveBeforeTransition()) {
@@ -410,13 +385,6 @@ class MenuBar extends React.Component {
         };
     }
     render () {
-        const updateThumbnailMessage = (
-            <FormattedMessage
-                defaultMessage="Update Thumbnail"
-                description="Menu bar item for updating the project thumbnail"
-                id="gui.menuBar.updateThumbnail"
-            />
-        );
         const saveNowMessage = (
             <FormattedMessage
                 defaultMessage="Save now"
@@ -528,8 +496,7 @@ class MenuBar extends React.Component {
                                             {newProjectMessage}
                                         </MenuItem>
                                     </MenuSection>
-                                    {(this.props.canSave || this.props.canCreateCopy ||
-                                        this.props.canRemix || this.props.canUpdateThumbnail) && (
+                                    {(this.props.canSave || this.props.canCreateCopy || this.props.canRemix) && (
                                         <MenuSection>
                                             {this.props.canSave && (
                                                 <MenuItem onClick={this.handleClickSave}>
@@ -544,11 +511,6 @@ class MenuBar extends React.Component {
                                             {this.props.canRemix && (
                                                 <MenuItem onClick={this.handleClickRemix}>
                                                     {remixMessage}
-                                                </MenuItem>
-                                            )}
-                                            {this.props.canUpdateThumbnail && (
-                                                <MenuItem onClick={this.handleClickSave}>
-                                                    {updateThumbnailMessage}
                                                 </MenuItem>
                                             )}
                                         </MenuSection>
@@ -958,7 +920,6 @@ MenuBar.propTypes = {
     canManageFiles: PropTypes.bool,
     canRemix: PropTypes.bool,
     canSave: PropTypes.bool,
-    canUpdateThumbnail: PropTypes.bool,
     canShare: PropTypes.bool,
     className: PropTypes.string,
     confirmReadyToReplaceProject: PropTypes.func,
@@ -982,7 +943,6 @@ MenuBar.propTypes = {
     mode220022BC: PropTypes.bool,
     modeMenuOpen: PropTypes.bool,
     modeNow: PropTypes.bool,
-    projectId: PropTypes.number.isRequired,
     onClickAbout: PropTypes.oneOfType([
         PropTypes.func, // button mode: call this callback when the About button is clicked
         PropTypes.arrayOf( // menu mode: list of items in the About menu
@@ -1021,7 +981,6 @@ MenuBar.propTypes = {
     onShare: PropTypes.func,
     onStartSelectingFileUpload: PropTypes.func,
     onToggleLoginOpen: PropTypes.func,
-    onUpdateProjectThumbnail: PropTypes.func,
     platform: PropTypes.oneOf(Object.keys(PLATFORM)),
     projectTitle: PropTypes.string,
     renderLogin: PropTypes.func,
@@ -1034,10 +993,7 @@ MenuBar.propTypes = {
 
     accountMenuOptions: AccountMenuOptionsPropTypes,
 
-    vm: PropTypes.instanceOf(VM).isRequired,
-
-
-    storage: GUIStoragePropType,
+    vm: PropTypes.instanceOf(VM).isRequired
 };
 
 MenuBar.defaultProps = {
@@ -1050,7 +1006,6 @@ const mapStateToProps = (state, ownProps) => {
     const user = state.session && state.session.session && state.session.session.user;
     const permissions = state.session && state.session.permissions;
     const sessionExists = state.session && typeof state.session.session !== 'undefined';
-    const storage = state.scratchGui.config.storage;
 
     return {
         aboutMenuOpen: aboutMenuOpen(state),
@@ -1075,10 +1030,6 @@ const mapStateToProps = (state, ownProps) => {
         mode1990: isTimeTravel1990(state),
         mode2020: isTimeTravel2020(state),
         modeNow: isTimeTravelNow(state),
-        projectId: state.scratchGui.projectState.projectId,
-        onUpdateProjectThumbnail:
-                ownProps.onUpdateProjectThumbnail ??
-                storage.saveProjectThumbnail?.bind(storage),
 
         platform: state.scratchGui.platform.platform,
 
@@ -1099,9 +1050,7 @@ const mapStateToProps = (state, ownProps) => {
             myClassesUrl: permissions?.educator ? '/educators/classes/' : null,
             myClassUrl: user && permissions?.student ? `/classes/${user.classroomId}/` : null,
             accountSettingsUrl: '/accounts/settings/'
-        },
-
-        storage
+        }
     };
 };
 

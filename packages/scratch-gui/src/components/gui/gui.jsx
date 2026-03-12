@@ -259,10 +259,6 @@ const GUIComponent = props => {
                 isRendererSupported={isRendererSupported}
                 isRtl={isRtl}
                 loading={loading}
-                manuallySaveThumbnails={
-                    manuallySaveThumbnails &&
-                    userOwnsProject
-                }
                 onUpdateProjectThumbnail={onUpdateProjectThumbnail}
                 stageSize={STAGE_SIZE_MODES.large}
                 vm={vm}
@@ -349,7 +345,6 @@ const GUIComponent = props => {
                         canManageFiles={canManageFiles}
                         canRemix={canRemix}
                         canSave={canSave}
-                        canUpdateThumbnail={userOwnsProject && manuallySaveThumbnails && !isPlayerOnly}
                         canShare={canShare}
                         className={styles.menuBarPosition}
                         enableCommunity={enableCommunity}
@@ -371,7 +366,6 @@ const GUIComponent = props => {
                         onShare={onShare}
                         onStartSelectingFileUpload={onStartSelectingFileUpload}
                         onToggleLoginOpen={onToggleLoginOpen}
-                        onUpdateProjectThumbnail={onUpdateProjectThumbnail}
                         userOwnsProject={userOwnsProject}
                         username={username}
                         accountMenuOptions={accountMenuOptions}
@@ -547,6 +541,8 @@ const GUIComponent = props => {
                                 vm={vm}
                                 ariaRole="region"
                                 ariaLabel={intl.formatMessage(ariaMessages.stage)}
+                                manuallySaveThumbnails={manuallySaveThumbnails}
+                                isInEditor
                             />
                             <Box
                                 className={styles.targetWrapper}

@@ -1,6 +1,6 @@
-import {FormattedMessage, defineMessages, useIntl} from 'react-intl';
+import {defineMessages, useIntl} from 'react-intl';
 import PropTypes from 'prop-types';
-import React, {useCallback} from 'react';
+import React, {useCallback, useRef} from 'react';
 import {connect} from 'react-redux';
 import VM from '@scratch/scratch-vm';
 
@@ -21,6 +21,12 @@ import styles from './stage-header.css';
 import {storeProjectThumbnail} from '../../lib/store-project-thumbnail.js';
 import dataURItoBlob from '../../lib/data-uri-to-blob.js';
 import throttle from 'lodash.throttle';
+import thumbnailIcon from './icon--thumbnail.svg';
+import {
+    getIsShowingWithId,
+    getIsUpdating
+} from '../../reducers/project-state.js';
+import ConfirmationPrompt from '../confirmation-prompt/confirmation-prompt.jsx';
 
 const messages = defineMessages({
     largeStageSizeMessage: {
@@ -48,6 +54,11 @@ const messages = defineMessages({
         description: 'Manually save project thumbnail',
         id: 'gui.stageHeader.saveThumbnail'
     },
+    setThumbnailMessage: {
+        defaultMessage: 'Are you sure you want to set your thumbnail?',
+        description: 'Confirmation message for manually saving project thumbnail',
+        id: 'gui.stageHeader.saveThumbnailMessage'
+    },
     fullscreenControl: {
         defaultMessage: 'Full Screen Control',
         description: 'Button to enter/exit full screen mode',
@@ -69,11 +80,15 @@ const StageHeaderComponent = function (props) {
         projectId,
         showBranding,
         stageSizeMode,
-        vm
+        vm,
+        isInEditor,
+        isProjectLoaded
     } = props;
     const intl = useIntl();
 
     let header = null;
+
+    const [isThumbnailPromptOpen, setIsThumbnailPromptOpen] = React.useState(false);
 
     const onUpdateThumbnail = useCallback(
         throttle(
@@ -90,6 +105,21 @@ const StageHeaderComponent = function (props) {
         ),
         [projectId, onUpdateProjectThumbnail]
     );
+
+    const onThumbnailPromptOpen = useCallback(() => {
+        setIsThumbnailPromptOpen(true);
+    }, []);
+
+    const onThumbnailPromptClose = useCallback(() => {
+        setIsThumbnailPromptOpen(false);
+    }, []);
+
+    const onUpdateThumbnailAndClose = useCallback(() => {
+        onUpdateThumbnail();
+        onThumbnailPromptClose();
+    }, [onUpdateThumbnail]);
+
+    const thumbnailButtonRef = useRef(null);
 
     if (isFullScreen) {
         const stageDimensions = getStageDimensions(null, true);
@@ -165,17 +195,32 @@ const StageHeaderComponent = function (props) {
                 <Box className={styles.stageMenuWrapper}>
                     <Controls vm={vm} />
                     <div className={styles.stageSizeRow}>
+                        {manuallySaveThumbnails && isInEditor && isProjectLoaded && (
+                            <Button
+                                aria-label={intl.formatMessage(messages.setThumbnail)}
+                                title={intl.formatMessage(messages.setThumbnail)}
+                                className={styles.stageButton}
+                                onClick={onThumbnailPromptOpen}
+                                componentRef={thumbnailButtonRef}
+                            >
+                                <img
+                                    src={thumbnailIcon}
+                                    alt={intl.formatMessage(messages.setThumbnail)}
+                                    className={styles.stageButtonIcon}
+                                />
+                            </Button>
+                        )}
+                        <ConfirmationPrompt
+                            isOpen={isThumbnailPromptOpen}
+                            title={messages.setThumbnail}
+                            message={messages.setThumbnailMessage}
+                            onConfirm={onUpdateThumbnailAndClose}
+                            onCancel={onThumbnailPromptClose}
+                            relativeElemRef={thumbnailButtonRef}
+                            modalPosition="down left"
+                        />
                         {stageControls}
                         <div className={styles.rightSection}>
-                            {manuallySaveThumbnails && (
-                                <Button
-                                    aria-label={intl.formatMessage(messages.setThumbnail)}
-                                    className={styles.setThumbnailButton}
-                                    onClick={onUpdateThumbnail}
-                                >
-                                    <FormattedMessage {...messages.setThumbnail} />
-                                </Button>
-                            )}
                             <Button
                                 className={styles.stageButton}
                                 onClick={onSetStageFull}
@@ -198,11 +243,17 @@ const StageHeaderComponent = function (props) {
     return header;
 };
 
-const mapStateToProps = state => ({
-    projectId: state.scratchGui.projectState.projectId,
-    // This is the button's mode, as opposed to the actual current state
-    stageSizeMode: state.scratchGui.stageSize.stageSize
-});
+const mapStateToProps = state => {
+    const projectState = state.scratchGui.projectState;
+    const loadingState = projectState.loadingState;
+
+    return {
+        projectId: state.scratchGui.projectState.projectId,
+        // This is the button's mode, as opposed to the actual current state
+        stageSizeMode: state.scratchGui.stageSize.stageSize,
+        isProjectLoaded: getIsShowingWithId(loadingState) || getIsUpdating(loadingState)
+    };
+};
 
 StageHeaderComponent.propTypes = {
     isFullScreen: PropTypes.bool.isRequired,
@@ -217,11 +268,14 @@ StageHeaderComponent.propTypes = {
     projectId: PropTypes.number.isRequired,
     showBranding: PropTypes.bool.isRequired,
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
-    vm: PropTypes.instanceOf(VM).isRequired
+    vm: PropTypes.instanceOf(VM).isRequired,
+    isInEditor: PropTypes.bool,
+    isProjectLoaded: PropTypes.bool
 };
 
 StageHeaderComponent.defaultProps = {
-    stageSizeMode: STAGE_SIZE_MODES.large
+    stageSizeMode: STAGE_SIZE_MODES.large,
+    isInEditor: false
 };
 
 export default connect(mapStateToProps)(StageHeaderComponent);

@@ -34,6 +34,7 @@
 
 .stage-size-row {
     display: flex;
+    gap: 0.25rem;
 }
 
 .stage-size-toggle-group {
@@ -44,14 +45,6 @@
     /* Use a white background so semi-transparent selection states look correct */
     background-color: $ui-white;
     border-radius: $form-radius;
-}
-
-[dir="ltr"] .stage-size-toggle-group {
-    margin-right: .2rem;
-}
-
-[dir="rtl"] .stage-size-toggle-group {
-    margin-left: .2rem;
 }
 
 .stage-button {
@@ -85,7 +78,7 @@
     align-items: center;
     gap: 0.5rem;
     background-color: transparent;
-
+    
     .setThumbnailButton {
         padding: 0.625rem 0.75rem;
         font-size: 0.75rem;
