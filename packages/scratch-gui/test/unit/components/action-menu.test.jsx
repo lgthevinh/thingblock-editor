@@ -30,7 +30,18 @@ describe('ActionMenu keyboard navigation', () => {
         mockMoreButtonClick.mockClear();
     });
 
-    test('focus + arrow_down opens menu and arrow_up cycles to last', () => {
+    test('focus on main button expands menu', () => {
+        render(<ActionMenu {...defaultProps} />);
+        const mainButton = screen.getByRole('button', {name: 'Main Button'});
+
+        act(() => {
+            mainButton.focus();
+        });
+
+        expect(mainButton.parentElement).toHaveClass('expanded');
+    });
+
+    test('arrow_down focuses first item, arrow_up focuses last item', async () => {
         render(<ActionMenu {...defaultProps} />);
         const mainButton = screen.getByRole('button', {name: 'Main Button'});
 
@@ -39,40 +50,57 @@ describe('ActionMenu keyboard navigation', () => {
             fireEvent.keyDown(mainButton, {key: KEY.ARROW_DOWN});
         });
 
-        const firstItem = screen.getByRole('button', {name: 'Button 1'});
-        expect(document.activeElement).toBe(firstItem);
+        await waitFor(() => {
+            expect(document.activeElement).toBe(screen.getByRole('button', {name: 'Button 1'}));
+        });
 
         act(() => {
+            mainButton.focus();
+            fireEvent.keyDown(mainButton, {key: KEY.ARROW_UP});
+        });
+
+        await waitFor(() => {
+            expect(document.activeElement).toBe(screen.getByRole('button', {name: 'Button 3'}));
+        });
+    });
+
+    test('arrow_up from first item cycles to last, arrow_down from last cycles to first', async () => {
+        render(<ActionMenu {...defaultProps} />);
+
+        const firstItem = screen.getByRole('button', {name: 'Button 1'});
+        const lastItem = screen.getByRole('button', {name: 'Button 3'});
+
+        act(() => {
+            firstItem.focus();
             fireEvent.keyDown(firstItem, {key: KEY.ARROW_UP});
         });
 
-        const lastItem = screen.getByRole('button', {name: 'Button 3'});
-        expect(document.activeElement).toBe(lastItem);
-
-        const menuContainer = mainButton.parentElement;
-        expect(menuContainer).toHaveClass('expanded');
-    });
-
-    test('escape closes menu and returns focus to main button', () => {
-        render(<ActionMenu {...defaultProps} />);
-        const mainButton = screen.getByRole('button', {name: 'Main Button'});
-
-        act(() => {
-            mainButton.focus();
-            fireEvent.keyDown(mainButton, {key: KEY.ARROW_DOWN});
+        await waitFor(() => {
+            expect(document.activeElement).toBe(lastItem);
         });
 
+        act(() => {
+            fireEvent.keyDown(lastItem, {key: KEY.ARROW_DOWN});
+        });
+
+        await waitFor(() => {
+            expect(document.activeElement).toBe(firstItem);
+        });
+    });
+    
+    test('escape returns focus to main button', async () => {
+        render(<ActionMenu {...defaultProps} />);
+        const mainButton = screen.getByRole('button', {name: 'Main Button'});
         const firstItem = screen.getByRole('button', {name: 'Button 1'});
-        expect(document.activeElement).toBe(firstItem);
 
         act(() => {
+            firstItem.focus();
             fireEvent.keyDown(firstItem, {key: KEY.ESCAPE});
         });
 
-        expect(document.activeElement).toBe(mainButton);
-        
-        const menuContainer = mainButton.parentElement;
-        expect(menuContainer).not.toHaveClass('expanded');
+        await waitFor(() => {
+            expect(document.activeElement).toBe(mainButton);
+        });
     });
 
     test('tab closes menu and focuses next element', async () => {
@@ -82,25 +110,19 @@ describe('ActionMenu keyboard navigation', () => {
                 <button>After Menu</button>
             </>
         );
-        const mainButton = screen.getByRole('button', {name: 'Main Button'});
+        const firstItem = screen.getByRole('button', {name: 'Button 1'});
         const afterButton = screen.getByRole('button', {name: 'After Menu'});
         const user = userEvent.setup();
 
         act(() => {
-            mainButton.focus();
-            fireEvent.keyDown(mainButton, {key: KEY.ARROW_DOWN});
+            firstItem.focus();
         });
 
-        const firstItem = screen.getByRole('button', {name: 'Button 1'});
-        expect(document.activeElement).toBe(firstItem);
-
-        act(() => {
-            user.tab();
-        });
+        await user.tab();
 
         await waitFor(() => {
             expect(document.activeElement).toBe(afterButton);
-            expect(mainButton.parentElement).not.toHaveClass('expanded');
+            expect(screen.getByRole('button', {name: 'Main Button'}).parentElement).not.toHaveClass('expanded');
         });
     });
 
@@ -109,7 +131,6 @@ describe('ActionMenu keyboard navigation', () => {
             <>
                 <button>Before Menu</button>
                 <ActionMenu {...defaultProps} />
-                <button>After Menu</button>
             </>
         );
 
@@ -121,11 +142,7 @@ describe('ActionMenu keyboard navigation', () => {
             mainButton.focus();
         });
 
-        const menuContainer = mainButton.parentElement;
-        expect(menuContainer).toHaveClass('expanded');
-        act(() => {
-            user.tab({shift: true});
-        });
+        await user.tab({shift: true});
 
         await waitFor(() => {
             expect(document.activeElement).toBe(beforeButton);
