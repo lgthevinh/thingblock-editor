@@ -512,6 +512,17 @@ const _parseUrl = (value, windowRef) => {
 const transformStrokeWidths = function (svgTag, windowRef, bboxForTesting) {
     const inherited = Matrix.identity();
 
+    // pass down transforms to leaf level
+    const _applyTransformToClipPath = function (element, matrix) {
+        const clipPathAttr = element.attributes && element.attributes['clip-path'];
+        if (!clipPathAttr) return;
+        const clipPathId = _parseUrl(clipPathAttr.value, null);
+        if (!clipPathId) return;
+        const clipPathEl = svgTag.getElementById(clipPathId);
+        if (!clipPathEl) return;
+        clipPathEl.setAttribute('transform', Matrix.toString(matrix));
+    };
+
     const applyTransforms = (element, matrix, strokeWidth, fill, stroke) => {
         if (_isContainerElement(element)) {
             // Push fills and stroke width down to leaves
@@ -523,12 +534,15 @@ const transformStrokeWidths = function (svgTag, windowRef, bboxForTesting) {
                 if (element.attributes.stroke) stroke = element.attributes.stroke.value;
             }
 
+            const currentMatrix = Matrix.compose(matrix, _parseTransform(element));
+            _applyTransformToClipPath(element, currentMatrix);
+            
             // If any child nodes don't take attributes, leave the attributes
             // at the parent level.
             for (let i = 0; i < element.childNodes.length; i++) {
                 applyTransforms(
                     element.childNodes[i],
-                    Matrix.compose(matrix, _parseTransform(element)),
+                    currentMatrix,
                     strokeWidth,
                     fill,
                     stroke
