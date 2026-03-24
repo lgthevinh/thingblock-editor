@@ -235,7 +235,7 @@ class MenuBar extends React.Component {
         if (this.props.shouldSaveBeforeTransition()) {
             this.props.autoUpdateProject(); // save before transitioning to project page
             waitForUpdate({
-                isUpdating: true
+                isSaving: true
             }); // queue the transition to project page
         } else {
             waitForUpdate(); // immediately transition to project page
@@ -249,11 +249,9 @@ class MenuBar extends React.Component {
             if (this.props.canSave) { // save before transitioning to project page
                 this.props.autoUpdateProject();
                 waitForUpdate({
-                    isUpdating: true,
+                    isSaving: true,
                     isSharing: true
                 }); // queue the transition to project page
-            } else {
-                waitForUpdate(); // immediately transition to project page
             }
         }
     }

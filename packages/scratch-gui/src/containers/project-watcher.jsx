@@ -16,7 +16,7 @@ import {
  * project is no longer updating.
  *
  * The waitForUpdate function accepts an object containing:
- * - isUpdating {boolean} Whether the project is currently updating
+ * - isSaving {boolean} Whether the project is currently saving
  * - isSharing {boolean} Whether the project is currently being shared
  */
 class ProjectWatcher extends React.Component {
@@ -32,12 +32,13 @@ class ProjectWatcher extends React.Component {
         };
     }
     componentDidUpdate (prevProps) {
-        if (this.state.saving) {
-            if (!this.state.sharing && this.props.isShowingWithId && !prevProps.isShowingWithId) {
+        if (this.state.saving && this.state.sharing) {
+            if (this.props.isShared && this.props.isShowingWithId) {
                 this.fulfill();
             }
-
-            if (this.state.sharing && this.props.isShared && this.props.isShowingWithId) {
+        }
+        if (this.state.saving && !this.state.sharing) {
+            if (this.props.isShowingWithId && !prevProps.isShowingWithId) {
                 this.fulfill();
             }
         }
@@ -49,12 +50,12 @@ class ProjectWatcher extends React.Component {
             sharing: false
         });
     }
-    waitForUpdate (updates = {isUpdating: false, isSharing: false}) {
-        const {isUpdating = false, isSharing = false} = updates;
+    waitForUpdate (updates = {isSaving: false, isSharing: false}) {
+        const {isSaving = false, isSharing = false} = updates;
 
-        if (isUpdating || isSharing) {
+        if (isSaving || isSharing) {
             this.setState({
-                saving: isUpdating,
+                saving: isSaving,
                 sharing: isSharing
             });
         } else { // fulfill immediately
