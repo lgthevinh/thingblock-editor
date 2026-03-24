@@ -516,7 +516,7 @@ const transformStrokeWidths = function (svgTag, windowRef, bboxForTesting) {
     const _applyTransformToClipPath = function (element, matrix) {
         const clipPathAttr = element.attributes && element.attributes['clip-path'];
         if (!clipPathAttr) return;
-        const clipPathId = _parseUrl(clipPathAttr.value, null);
+        const clipPathId = _parseUrl(clipPathAttr.value, windowRef);
         if (!clipPathId) return;
         const clipPathEl = svgTag.getElementById(clipPathId);
         if (!clipPathEl) return;
