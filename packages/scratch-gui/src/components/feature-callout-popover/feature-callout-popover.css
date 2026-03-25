@@ -6,7 +6,6 @@
     width: 21rem;
     padding: 1rem;
     align-items: flex-start;
-    gap: -0.0625rem;
 
     border-radius: 0.5rem;
     border: 0.0625rem solid $motion-primary;

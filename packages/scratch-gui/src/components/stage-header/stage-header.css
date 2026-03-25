@@ -70,7 +70,7 @@
 
 .stage-button-highlighted {
     border-radius: 4px;
-    box-shadow: 0 0 0 2px #4C97FF;
+    box-shadow: 0 0 0 2px $motion-primary;
 }
 
 [dir="rtl"] .stage-button-icon {

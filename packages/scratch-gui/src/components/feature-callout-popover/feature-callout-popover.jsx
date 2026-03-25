@@ -1,14 +1,14 @@
 import React, {useEffect} from 'react';
 import PropTypes from 'prop-types';
-import styles from './tooltip.css';
-import {PopupAlign, PopupSide} from '../../lib/calculatePopupPosition';
+import styles from './feature-callout-popover.css';
+import {PopupAlign, PopupSide} from '../../lib/calculatePopupPosition.js';
 
 import arrowDownIcon from './icon--arrow-down.svg';
 import arrowUpIcon from './icon--arrow-up.svg';
 import arrowLeftIcon from './icon--arrow-left.svg';
 import arrowRightIcon from './icon--arrow-right.svg';
 
-import Box from '../box/box';
+import Box from '../box/box.jsx';
 import PopupWithArrow from '../popup-with-arrow/popup-with-arrow.jsx';
 
 const defaultConfig = {
@@ -27,7 +27,7 @@ const arrowConfig = {
     arrowRightIcon
 };
 
-const Tooltip = ({
+const FeatureCalloutPopover = ({
     isOpen,
     onRequestClose,
     onRequestOpen,
@@ -116,7 +116,7 @@ const Tooltip = ({
     );
 };
 
-Tooltip.propTypes = {
+FeatureCalloutPopover.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onRequestClose: PropTypes.func,
     onRequestOpen: PropTypes.func,
@@ -136,4 +136,4 @@ Tooltip.propTypes = {
     })
 };
 
-export default Tooltip;
+export default FeatureCalloutPopover;

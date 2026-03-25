@@ -22,7 +22,7 @@ import dataURItoBlob from '../../lib/data-uri-to-blob.js';
 import throttle from 'lodash.throttle';
 import thumbnailIcon from './icon--thumbnail.svg';
 import ConfirmationPrompt from '../confirmation-prompt/confirmation-prompt.jsx';
-import Tooltip from '../tooltip/tooltip.jsx';
+import FeatureCalloutPopover from '../feature-callout-popover/feature-callout-popover.jsx';
 import classNames from 'classnames';
 import {PopupAlign, PopupSide} from '../../lib/calculatePopupPosition.js';
 
@@ -245,7 +245,7 @@ const StageHeaderComponent = function (props) {
                     <Controls vm={vm} />
                     <div className={styles.stageSizeRow}>
                         {/* To remove - new feature awareness tooltip */}
-                        <Tooltip
+                        <FeatureCalloutPopover
                             isOpen={isThumbnailTooltipOpen}
                             onRequestOpen={onOpenTooltip}
                             onRequestClose={onCloseTooltip}

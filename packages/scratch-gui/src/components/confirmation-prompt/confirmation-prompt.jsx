@@ -56,8 +56,14 @@ const ConfirmationPrompt = ({
     align,
     layoutConfig
 }) => {
-    const {modalWidth, spaceForArrow, counterOffset, arrowOffsetFromBottom, arrowHeight, arrowWidth} =
-        {...defaultConfig, ...layoutConfig};
+    const {
+        modalWidth,
+        spaceForArrow,
+        counterOffset,
+        arrowOffsetFromBottom,
+        arrowHeight,
+        arrowWidth
+    } = {...defaultConfig, ...layoutConfig};
 
     return (
         <PopupWithArrow
