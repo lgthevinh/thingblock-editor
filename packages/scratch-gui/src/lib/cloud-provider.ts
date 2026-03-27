@@ -25,7 +25,13 @@ class CloudProvider {
      * @param {string} projectId The id associated with the project containing
      * @param {() => Promise<string | null | undefined>} readAuth A function to get an auth token
      */
-    constructor (cloudHost, vm, username, projectId, readAuth = () => Promise.resolve(null)) {
+    constructor (
+        cloudHost: string,
+        vm: unknown,
+        username: string,
+        projectId: string,
+        readAuth: () => Promise<string | null | undefined> = () => Promise.resolve(null)
+    ) {
         this.vm = vm;
         this.username = username;
         this.projectId = projectId;
@@ -58,10 +64,10 @@ class CloudProvider {
 
         const authPromise = this.readAuth ? this.readAuth() : Promise.resolve(null);
         authPromise.then(token => {
-            try {
-                // See https://stackoverflow.com/questions/4361173/http-headers-in-websockets-client-api
-                const protocols = token ? [`bearer=${token}`] : [];
+            // See https://stackoverflow.com/questions/4361173/http-headers-in-websockets-client-api
+            const protocols = token ? ['bearer!' + token] : [];
 
+            try {
                 this.connection = new WebSocket((location.protocol === 'http:' ? 'ws://' : 'wss://') + this.cloudHost, protocols);
             } catch (e) {
                 log.warn('Websocket support is not available in this browser', e);
@@ -152,10 +158,15 @@ class CloudProvider {
      * Format and send a message to the cloud data server.
      * @param {string} methodName The message method, indicating the action to perform.
      * @param {string} dataName The name of the cloud variable this message pertains to
-     * @param {string | number} dataValue The value to set the cloud variable to
+     * @param {string | number | null} dataValue The value to set the cloud variable to
      * @param {string} dataNewName The new name for the cloud variable (if renaming)
      */
-    writeToServer (methodName, dataName?, dataValue?, dataNewName?) {
+    writeToServer (
+        methodName: string,
+        dataName?: string,
+        dataValue?: string | number | null,
+        dataNewName?: string,
+    ) {
         const msg: any = {};
         msg.method = methodName;
         msg.user = this.username;
@@ -193,7 +204,7 @@ class CloudProvider {
      * @param {string} name The name of the variable to create
      * @param {string | number} value The value of the new cloud variable.
      */
-    createVariable (name, value) {
+    createVariable (name: string, value: string | number) {
         this.writeToServer('create', name, value);
     }
 
@@ -203,7 +214,7 @@ class CloudProvider {
      * @param {string} name The name of the variable to update
      * @param {string | number} value The new value for the variable
      */
-    updateVariable (name, value) {
+    updateVariable (name: string, value: string | number) {
         this.writeToServer('set', name, value);
     }
 
@@ -213,7 +224,7 @@ class CloudProvider {
      * @param {string} oldName The old name of the variable to rename
      * @param {string} newName The new name for the cloud variable.
      */
-    renameVariable (oldName, newName) {
+    renameVariable (oldName: string, newName: string) {
         this.writeToServer('rename', oldName, null, newName);
     }
 
@@ -222,7 +233,7 @@ class CloudProvider {
      * a cloud variable on the server.
      * @param {string} name The name of the variable to delete
      */
-    deleteVariable (name) {
+    deleteVariable (name: string) {
         this.writeToServer('delete', name);
     }
 
