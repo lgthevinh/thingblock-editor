@@ -409,7 +409,6 @@ const Cards = props => {
                 top: `${menuBarHeight}px`,
                 left: `${-cardHorizontalDragOffset}px`
             }}
-            tabIndex={-1}
         >
             <Draggable
                 bounds="parent"
