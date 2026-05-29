@@ -81,7 +81,7 @@ For an example of how to use scratch-paint as a library, check out the `scratch-
 
 In your parent component:
 ```
-import PaintEditor from 'scratch-paint';
+import PaintEditor from '@scratch/scratch-paint';
 ...
 <PaintEditor
     image={optionalImage}
@@ -115,7 +115,7 @@ SVGs of up to size 480 x 360 will fit into the view window of the paint editor, 
 
 In the top-level combineReducers function:
 ```
-import {ScratchPaintReducer} from 'scratch-paint';
+import {ScratchPaintReducer} from '@scratch/scratch-paint';
 ...
 combineReducers({
 	...

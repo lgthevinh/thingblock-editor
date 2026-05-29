@@ -77,7 +77,7 @@ export class EditorState {
                 initTelemetryModal,
                 initEmbedded
             } = guiRedux;
-            const {ScratchPaintReducer} = require('scratch-paint');
+            const {ScratchPaintReducer} = require('@scratch/scratch-paint');
 
             const configOrLegacy = configFactory ?
                 configFactory() :
