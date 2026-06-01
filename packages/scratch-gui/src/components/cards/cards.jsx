@@ -65,8 +65,10 @@ const labelMap = defineMessages({
 
 const CardHeader = ({onCloseCards, onShrinkExpandCards, onShowAll, totalSteps, step, expanded}) => {
     const intl = useIntl();
+    const headerClassName = expanded ? styles.headerButtons :
+        classNames(styles.headerButtons, styles.headerButtonsHidden);
 
-    return <div className={expanded ? styles.headerButtons : classNames(styles.headerButtons, styles.headerButtonsHidden)}>
+    return (<div className={headerClassName}>
         <button
             className={styles.allButton}
             onClick={onShowAll}
@@ -132,8 +134,8 @@ const CardHeader = ({onCloseCards, onShrinkExpandCards, onShowAll, totalSteps, s
                 />
             </button>
         </div>
-    </div>;
-}
+    </div>);
+};
 
 class VideoStep extends React.Component {
 
@@ -238,9 +240,9 @@ ImageStep.propTypes = {
 };
 
 const NextPrevButtons = ({isRtl, onNextStep, onPrevStep, expanded}) => {
-   const intl = useIntl();
+    const intl = useIntl();
 
-   return <Fragment>
+    return (<Fragment>
         {onNextStep ? (
             <div>
                 <div className={expanded ? (isRtl ? styles.leftCard : styles.rightCard) : styles.hidden} />
@@ -252,7 +254,9 @@ const NextPrevButtons = ({isRtl, onNextStep, onPrevStep, expanded}) => {
                     <img
                         draggable={false}
                         src={isRtl ? leftArrow : rightArrow}
-                        alt={isRtl ? intl.formatMessage(labelMap.leftArrowIcon) : intl.formatMessage(labelMap.rightArrowIcon)}
+                        alt={isRtl ?
+                            intl.formatMessage(labelMap.leftArrowIcon) :
+                            intl.formatMessage(labelMap.rightArrowIcon)}
                     />
                 </button>
             </div>
@@ -268,13 +272,16 @@ const NextPrevButtons = ({isRtl, onNextStep, onPrevStep, expanded}) => {
                     <img
                         draggable={false}
                         src={isRtl ? rightArrow : leftArrow}
-                        alt={isRtl ? intl.formatMessage(labelMap.rightArrowIcon) : intl.formatMessage(labelMap.leftArrowIcon)}
+                        alt={
+                            isRtl ?
+                                intl.formatMessage(labelMap.rightArrowIcon) :
+                                intl.formatMessage(labelMap.leftArrowIcon)}
                     />
                 </button>
             </div>
         ) : null}
-    </Fragment>;
-}
+    </Fragment>);
+};
 
 NextPrevButtons.propTypes = {
     expanded: PropTypes.bool.isRequired,
