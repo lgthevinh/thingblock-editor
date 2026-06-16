@@ -1,4 +1,3 @@
-import {ScratchPaintReducer} from '@scratch/scratch-paint';
 import LocalesReducer, {localesInitialState, initLocale, selectLocale} from './reducers/locales.js';
 import GuiReducer, {buildInitialState, guiMiddleware, initEmbedded, initFullScreen, initPlayer} from './reducers/gui';
 import {setFullScreen, setPlayer, setEmbedded} from './reducers/mode.js';
@@ -42,8 +41,7 @@ import {setStageSize} from './reducers/stage-size';
 
 export const guiReducers = {
     locales: LocalesReducer,
-    scratchGui: GuiReducer,
-    scratchPaint: ScratchPaintReducer
+    scratchGui: GuiReducer
 };
 
 export {
