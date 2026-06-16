@@ -342,34 +342,36 @@ class MenuBar extends React.Component {
                             avatarBadge={this.props.authorAvatarBadge}
                         />
                     ) : null)}
-                    <div className={classNames(styles.menuBarItem)}>
-                        {this.props.canShare ? (
-                            (this.props.isShowingProject || this.props.isUpdating) && (
-                                <ProjectWatcher
-                                    onDoneUpdating={this.props.onSeeCommunity}
-                                    isShared={this.props.isShared}
-                                >
-                                    {
-                                        waitForUpdate => (
-                                            <ShareButton
-                                                className={styles.menuBarButton}
-                                                isShared={this.props.isShared}
-                                                /* eslint-disable react/jsx-no-bind */
-                                                onClick={() => {
-                                                    this.handleClickShare(waitForUpdate);
-                                                }}
-                                                /* eslint-enable react/jsx-no-bind */
-                                            />
-                                        )
-                                    }
-                                </ProjectWatcher>
-                            )
-                        ) : []}
-                        {this.props.canRemix ? remixButton : []}
-                    </div>
-                    <div className={classNames(styles.menuBarItem, styles.communityButtonWrapper)}>
-                        {this.props.enableCommunity ? (
-                            (this.props.isShowingProject || this.props.isUpdating) && (
+                    {(this.props.canShare || this.props.canRemix) && (
+                        <div className={classNames(styles.menuBarItem)}>
+                            {this.props.canShare ? (
+                                (this.props.isShowingProject || this.props.isUpdating) && (
+                                    <ProjectWatcher
+                                        onDoneUpdating={this.props.onSeeCommunity}
+                                        isShared={this.props.isShared}
+                                    >
+                                        {
+                                            waitForUpdate => (
+                                                <ShareButton
+                                                    className={styles.menuBarButton}
+                                                    isShared={this.props.isShared}
+                                                    /* eslint-disable react/jsx-no-bind */
+                                                    onClick={() => {
+                                                        this.handleClickShare(waitForUpdate);
+                                                    }}
+                                                    /* eslint-enable react/jsx-no-bind */
+                                                />
+                                            )
+                                        }
+                                    </ProjectWatcher>
+                                )
+                            ) : []}
+                            {this.props.canRemix ? remixButton : []}
+                        </div>
+                    )}
+                    {this.props.enableCommunity && (
+                        <div className={classNames(styles.menuBarItem, styles.communityButtonWrapper)}>
+                            {(this.props.isShowingProject || this.props.isUpdating) && (
                                 <ProjectWatcher onDoneUpdating={this.props.onSeeCommunity}>
                                     {
                                         waitForUpdate => (
@@ -384,9 +386,9 @@ class MenuBar extends React.Component {
                                         )
                                     }
                                 </ProjectWatcher>
-                            )
-                        ) : []}
-                    </div>
+                            )}
+                        </div>
+                    )}
                     <Divider className={classNames(styles.divider)} />
                     <div className={styles.fileGroup}>
                         <button
@@ -434,11 +436,9 @@ class MenuBar extends React.Component {
                             />
                         </div>
                     )}
-                    <div className={styles.menuBarItem}>
-                        {this.props.canSave && (
-                            <SaveStatus className={classNames(styles.hoverable, styles.menuBarItem)} />
-                        )}
-                    </div>
+                    {this.props.canSave && (
+                        <SaveStatus className={classNames(styles.hoverable, styles.menuBarItem)} />
+                    )}
 
                     {menuOpts.canHaveSession ? (
                         this.props.username ? (
