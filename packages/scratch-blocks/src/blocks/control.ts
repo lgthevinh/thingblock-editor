@@ -388,6 +388,22 @@ Blockly.Blocks.control_delete_this_clone = {
   },
 }
 
+Blockly.Blocks.control_print = {
+  init: function (this: Blockly.Block) {
+    this.jsonInit({
+      id: 'control_print',
+      message0: Blockly.Msg.CONTROL_PRINT,
+      args0: [
+        {
+          type: 'input_value',
+          name: 'STRING',
+        },
+      ],
+      extensions: ['colours_control', 'shape_statement'],
+    })
+  },
+}
+
 Blockly.Blocks.control_get_counter = {
   /**
    * Block to get the counter value. This is an obsolete block that is
@@ -454,3 +470,4 @@ Blockly.Blocks.control_all_at_once = {
     })
   },
 }
+
