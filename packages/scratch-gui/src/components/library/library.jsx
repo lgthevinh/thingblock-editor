@@ -282,6 +282,7 @@ class LibraryComponent extends React.Component {
             disabled={data.disabled}
             extensionId={data.extensionId}
             featured={data.featured}
+            fixedSize={this.props.fixedItemSize}
             hidden={data.hidden}
             icons={icons}
             id={key}
@@ -412,6 +413,7 @@ LibraryComponent.propTypes = {
         })
          
     ),
+    fixedItemSize: PropTypes.bool,
     filterable: PropTypes.bool,
     withCategories: PropTypes.bool,
     id: PropTypes.string.isRequired,
@@ -427,6 +429,7 @@ LibraryComponent.propTypes = {
 };
 
 LibraryComponent.defaultProps = {
+    fixedItemSize: false,
     filterable: true,
     showPlayButton: false
 };

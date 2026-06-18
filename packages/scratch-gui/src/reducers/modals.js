@@ -2,6 +2,7 @@ const OPEN_MODAL = 'scratch-gui/modals/OPEN_MODAL';
 const CLOSE_MODAL = 'scratch-gui/modals/CLOSE_MODAL';
 
 const MODAL_BACKDROP_LIBRARY = 'backdropLibrary';
+const MODAL_BOARD_LIBRARY = 'boardLibrary';
 const MODAL_COSTUME_LIBRARY = 'costumeLibrary';
 const MODAL_DEBUG = 'debugModal';
 const MODAL_EXTENSION_LIBRARY = 'extensionLibrary';
@@ -15,6 +16,7 @@ const MODAL_TIPS_LIBRARY = 'tipsLibrary';
 
 const initialState = {
     [MODAL_BACKDROP_LIBRARY]: false,
+    [MODAL_BOARD_LIBRARY]: false,
     [MODAL_COSTUME_LIBRARY]: false,
     [MODAL_DEBUG]: false,
     [MODAL_EXTENSION_LIBRARY]: false,
@@ -57,6 +59,9 @@ const closeModal = function (modal) {
 const openBackdropLibrary = function () {
     return openModal(MODAL_BACKDROP_LIBRARY);
 };
+const openBoardLibrary = function () {
+    return openModal(MODAL_BOARD_LIBRARY);
+};
 const openCostumeLibrary = function () {
     return openModal(MODAL_COSTUME_LIBRARY);
 };
@@ -89,6 +94,9 @@ const openTipsLibrary = function () {
 };
 const closeBackdropLibrary = function () {
     return closeModal(MODAL_BACKDROP_LIBRARY);
+};
+const closeBoardLibrary = function () {
+    return closeModal(MODAL_BOARD_LIBRARY);
 };
 const closeCostumeLibrary = function () {
     return closeModal(MODAL_COSTUME_LIBRARY);
@@ -124,6 +132,7 @@ export {
     reducer as default,
     initialState as modalsInitialState,
     openBackdropLibrary,
+    openBoardLibrary,
     openCostumeLibrary,
     openDebugModal,
     openExtensionLibrary,
@@ -135,6 +144,7 @@ export {
     openTipsLibrary,
     openConnectionModal,
     closeBackdropLibrary,
+    closeBoardLibrary,
     closeCostumeLibrary,
     closeDebugModal,
     closeExtensionLibrary,

@@ -60,7 +60,8 @@ class LibraryItemComponent extends React.PureComponent {
                     styles.libraryItem,
                     styles.featuredItem,
                     {
-                        [styles.disabled]: this.props.disabled
+                        [styles.disabled]: this.props.disabled,
+                        [styles.featuredItemFixed]: this.props.fixedSize
                     },
                     this.props.extensionId ? styles.libraryItemExtension : null,
                     this.props.hidden ? styles.hidden : null
@@ -97,7 +98,12 @@ class LibraryItemComponent extends React.PureComponent {
                     ) : null}
                     <div
                         className={this.props.extensionId ?
-                            classNames(styles.featuredExtensionText, styles.featuredText) : styles.featuredText
+                            classNames(styles.featuredExtensionText, styles.featuredText, {
+                                [styles.featuredTextFixed]: this.props.fixedSize
+                            }) :
+                            classNames(styles.featuredText, {
+                                [styles.featuredTextFixed]: this.props.fixedSize
+                            })
                         }
                     >
                         <span className={styles.libraryItemName}>{this.props.name}</span>
@@ -209,6 +215,7 @@ LibraryItemComponent.propTypes = {
     disabled: PropTypes.bool,
     extensionId: PropTypes.string,
     featured: PropTypes.bool,
+    fixedSize: PropTypes.bool,
     hidden: PropTypes.bool,
     iconSource: ScratchImage.ImageSourcePropType,
     insetIconURL: PropTypes.string,
@@ -233,6 +240,7 @@ LibraryItemComponent.propTypes = {
 
 LibraryItemComponent.defaultProps = {
     disabled: false,
+    fixedSize: false,
     showPlayButton: false
 };
 

@@ -150,6 +150,36 @@
     padding-bottom: .25rem;
 }
 
+.featured-item-fixed {
+    height: 280px;
+}
+
+[dir="ltr"] .featured-item-fixed .featured-text-fixed {
+    text-align: left;
+}
+
+[dir="rtl"] .featured-item-fixed .featured-text-fixed {
+    text-align: right;
+}
+
+.featured-item-fixed .library-item-name {
+    width: 100%;
+    text-align: inherit;
+}
+
+.featured-item-fixed .featured-text-fixed {
+    height: 94px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.featured-item-fixed .featured-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .featured-extension-metadata {
     width: 100%;
     padding: 0 1.25rem 1rem 1.25rem;
