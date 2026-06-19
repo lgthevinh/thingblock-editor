@@ -9,6 +9,7 @@ const {
     statement
 } = require('./code-generator-provider');
 const ThingBotTelemetrixExtension = require('../extensions/scratch3_thingbot_telemetrix');
+const Scratch3Arduino = require('../extensions/scratch3_arduino');
 
 const LANGUAGES = [Language.JAVASCRIPT, Language.ARDUINO_CPP];
 
@@ -548,6 +549,7 @@ const createDefaultRegistry = () => {
     registerSensing(registry);
     registerProcedures(registry);
     registry.registerProvider(ThingBotTelemetrixExtension);
+    registry.registerProvider(Scratch3Arduino);
     return registry;
 };
 

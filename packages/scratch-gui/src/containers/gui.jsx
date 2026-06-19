@@ -79,6 +79,14 @@ class GUI extends React.Component {
         if (this.props.shouldStopProject && !prevProps.shouldStopProject) {
             this.props.vm.stopAll();
         }
+        if (this.props.selectedBoardId && this.props.selectedBoardId !== prevProps.selectedBoardId) {
+            // Board-only blocks live in the Arduino extension; load it on first board selection so its
+            // category is available to the palette. It stays loaded after deselect; the toolbox hides it.
+            const {extensionManager} = this.props.vm;
+            if (!extensionManager.isExtensionLoaded('arduino')) {
+                extensionManager.loadExtensionURL('arduino');
+            }
+        }
     }
     render () {
         if (this.props.isError) {

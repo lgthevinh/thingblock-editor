@@ -7,6 +7,7 @@ const generateCode = require('../../src/codegen/generate-code');
 const Language = require('../../src/codegen/language');
 const Scratch3ControlBlocks = require('../../src/blocks/scratch3_control');
 const ThingBotTelemetrixExtension = require('../../src/extensions/scratch3_thingbot_telemetrix');
+const Scratch3Arduino = require('../../src/extensions/scratch3_arduino');
 
 const getOpcodeNames = primitiveClass => Object.keys(
     new primitiveClass(new Runtime()).getPrimitives()
@@ -316,6 +317,54 @@ test('generateCode covers data, sensing, operator, procedure, and ThingBot opcod
     t.match(js.code, 'thingbot.digitalWrite(13, "HIGH");');
     t.match(arduinoCpp.code, 'int score = (1 + 2);');
     t.match(arduinoCpp.code, '/* Unsupported block: thingbotTelemetrix_digitalWrite */');
+    t.end();
+});
+
+test('Arduino extension registers arduino-cpp generators only', t => {
+    const registry = new GeneratorRegistry();
+
+    registry.registerProvider(Scratch3Arduino);
+
+    t.ok(registry.get('arduino_digitalWrite', Language.ARDUINO_CPP));
+    t.notOk(registry.get('arduino_digitalWrite', Language.JAVASCRIPT));
+    t.end();
+});
+
+test('generateCode emits Arduino C++ for board-only Arduino blocks and is unsupported in js', t => {
+    const blocks = createBlockContainer();
+    blocks.createBlock({
+        id: 'flag',
+        opcode: 'event_whenflagclicked',
+        next: 'write',
+        parent: null,
+        inputs: {},
+        fields: {},
+        topLevel: true
+    });
+    blocks.createBlock({
+        id: 'write',
+        opcode: 'arduino_digitalWrite',
+        next: null,
+        parent: 'flag',
+        inputs: {PIN: {name: 'PIN', block: 'pin', shadow: 'pin'}},
+        fields: {LEVEL: {name: 'LEVEL', value: 'HIGH'}},
+        topLevel: false
+    });
+    addNumberBlock(blocks, 'pin', 13);
+
+    const arduinoCpp = generateCode({blocks}, Language.ARDUINO_CPP);
+    const js = generateCode({blocks}, Language.JAVASCRIPT);
+
+    t.same(arduinoCpp.diagnostics, []);
+    t.match(arduinoCpp.code, 'digitalWrite(13, HIGH);');
+
+    t.equal(js.diagnostics.length, 1);
+    t.match(js.diagnostics[0], {
+        severity: 'warning',
+        blockId: 'write',
+        opcode: 'arduino_digitalWrite'
+    });
+    t.match(js.code, '/* Unsupported block: arduino_digitalWrite */');
     t.end();
 });
 

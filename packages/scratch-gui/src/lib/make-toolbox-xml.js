@@ -18,7 +18,7 @@ const xmlEscape = function (unsafe) {
     });
 };
 
-const events = function (isInitialSetup, isStage, targetId, colors) {
+const events = function (isInitialSetup, isStage, targetId, colors, boardMode) {
     // Note: the category's secondaryColour matches up with the blocks' tertiary color, both used for border color.
     return `
     <category name="${ScratchBlocks.ScratchMsgs.translate(
@@ -28,8 +28,10 @@ const events = function (isInitialSetup, isStage, targetId, colors) {
         colors.colourPrimary
     }" secondaryColour="${colors.colourTertiary}">
         <block type="event_whenflagclicked"/>
+        ${boardMode ? '' : `
         <block type="event_whenkeypressed">
         </block>
+        `}
         ${categorySeparator}
     </category>
     `;
@@ -82,9 +84,11 @@ const control = function (isInitialSetup, isStage, targetId, colors) {
     `;
 };
 
-const sensing = function (isInitialSetup, isStage, targetId, colors) {
+const sensing = function (isInitialSetup, isStage, targetId, colors, boardMode) {
     const name = ScratchBlocks.ScratchMsgs.translate('SENSING_ASK_TEXT', 'What\'s your name?');
     // Note: the category's secondaryColour matches up with the blocks' tertiary color, both used for border color.
+    // In board mode, host-only blocks (mouse, keyboard, ask/answer, clock, online) are hidden; only the
+    // timer blocks remain because they map to millis() on the board. sensing_timer/resettimer stay in both.
     return `
     <category
         name="${ScratchBlocks.ScratchMsgs.translate(
@@ -94,6 +98,7 @@ const sensing = function (isInitialSetup, isStage, targetId, colors) {
         toolboxitemid="sensing"
         colour="${colors.colourPrimary}"
         secondaryColour="${colors.colourTertiary}">
+        ${boardMode ? '' : `
         ${isInitialSetup ? '' : `
             <block id="askandwait" type="sensing_askandwait">
                 <value name="QUESTION">
@@ -114,13 +119,16 @@ const sensing = function (isInitialSetup, isStage, targetId, colors) {
         <block type="sensing_mousex"/>
         <block type="sensing_mousey"/>
         ${blockSeparator}
+        `}
         <block id="timer" type="sensing_timer"/>
         <block type="sensing_resettimer"/>
+        ${boardMode ? '' : `
         ${blockSeparator}
         <block id="current" type="sensing_current"/>
         <block type="sensing_dayssince2000"/>
         ${blockSeparator}
         <block id="online" type="sensing_online" />
+        `}
         ${categorySeparator}
     </category>
     `;
@@ -368,10 +376,12 @@ const xmlClose = '</xml>';
  * @property {string} id - the extension / category ID.
  * @property {string} xml - the `<category>...</category>` XML for this extension / category.
  * @param {?object} colors - The colors for the color mode.
+ * @param {?boolean} boardMode - Whether a board is selected. In board mode, host-only core blocks
+ * (mouse, keyboard, ask/answer, clock, online) are hidden from the palette.
  * @returns {string} - a ScratchBlocks-style XML document for the contents of the toolbox.
  */
 const makeToolboxXML = function (isInitialSetup, isStage = true, targetId, categoriesXML = [],
-    colors = defaultColors) {
+    colors = defaultColors, boardMode = false) {
     isStage = isInitialSetup || isStage;
     const gap = [categorySeparator];
 
@@ -385,9 +395,10 @@ const makeToolboxXML = function (isInitialSetup, isStage = true, targetId, categ
         }
         // return `undefined`
     };
-    const eventsXML = moveCategory('event') || events(isInitialSetup, isStage, targetId, colors.event);
+    const eventsXML = moveCategory('event') || events(isInitialSetup, isStage, targetId, colors.event, boardMode);
     const controlXML = moveCategory('control') || control(isInitialSetup, isStage, targetId, colors.control);
-    const sensingXML = moveCategory('sensing') || sensing(isInitialSetup, isStage, targetId, colors.sensing);
+    const sensingXML = moveCategory('sensing') ||
+        sensing(isInitialSetup, isStage, targetId, colors.sensing, boardMode);
     const operatorsXML = moveCategory('operators') || operators(isInitialSetup, isStage, targetId, colors.operators);
     const variablesXML = moveCategory('data') || variables(isInitialSetup, isStage, targetId, colors.data);
     const myBlocksXML = moveCategory('procedures') || myBlocks(isInitialSetup, isStage, targetId, colors.more);

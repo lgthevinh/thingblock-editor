@@ -2,6 +2,7 @@ import bindAll from 'lodash.bindall';
 import debounce from 'lodash.debounce';
 import defaultsDeep from 'lodash.defaultsdeep';
 import makeToolboxXML from '../lib/make-toolbox-xml';
+import {BOARD_ONLY_CATEGORY_IDS} from '../lib/board-mode';
 import PropTypes from 'prop-types';
 import React from 'react';
 import VMScratchBlocks from '../lib/blocks';
@@ -201,6 +202,15 @@ class Blocks extends React.Component {
         // If any modals are open, call hideChaff to close z-indexed field editors
         if (this.props.anyModalVisible && !prevProps.anyModalVisible) {
             this.ScratchBlocks.hideChaff();
+        }
+
+        // Rebuild the toolbox when board selection changes, since board mode gates which
+        // blocks and extension categories appear in the palette.
+        if (prevProps.selectedBoardId !== this.props.selectedBoardId) {
+            const toolboxXML = this.getToolboxXML();
+            if (toolboxXML) {
+                this.props.updateToolboxState(toolboxXML);
+            }
         }
 
         // Only rerender the toolbox when the blocks are visible and the xml is
@@ -418,12 +428,13 @@ class Blocks extends React.Component {
             const stage = runtime.getTargetForStage();
             if (!target) target = stage; // If no editingTarget, use the stage
 
+            const boardMode = Boolean(this.props.selectedBoardId);
             const dynamicBlocksXML = injectExtensionCategoryMode(
                 this.props.vm.runtime.getBlocksXML(target),
                 this.props.colorMode
-            );
+            ).filter(category => boardMode || !BOARD_ONLY_CATEGORY_IDS.includes(category.id));
             return makeToolboxXML(false, target.isStage, target.id, dynamicBlocksXML,
-                getColorsForMode(this.props.colorMode)
+                getColorsForMode(this.props.colorMode), boardMode
             );
         } catch {
             return null;
@@ -681,6 +692,7 @@ class Blocks extends React.Component {
             useCatBlocks,
             workspaceMetrics,
             colorMode,
+            selectedBoardId,
             ...props
         } = this.props;
          
@@ -753,6 +765,7 @@ Blocks.propTypes = {
     }),
     stageSize: PropTypes.oneOf(Object.keys(STAGE_DISPLAY_SIZES)).isRequired,
     colorMode: PropTypes.oneOf(Object.keys(colorModeMap)),
+    selectedBoardId: PropTypes.string,
     toolboxXML: PropTypes.string,
     updateMetrics: PropTypes.func,
     updateToolboxState: PropTypes.func,
@@ -800,6 +813,7 @@ const mapStateToProps = state => ({
     isRtl: state.locales.isRtl,
     locale: state.locales.locale,
     messages: state.locales.messages,
+    selectedBoardId: state.scratchGui.board.selectedBoardId,
     toolboxXML: state.scratchGui.toolbox.toolboxXML,
     customProceduresVisible: state.scratchGui.customProcedures.active,
     workspaceMetrics: state.scratchGui.workspaceMetrics,
