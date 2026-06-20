@@ -671,6 +671,22 @@ class Runtime extends EventEmitter {
     }
 
     /**
+     * Event name for reporting that a firmware device connection has opened.
+     * @constant {string}
+     */
+    static get DEVICE_CONNECTED () {
+        return 'DEVICE_CONNECTED';
+    }
+
+    /**
+     * Event name for reporting that a firmware device connection has closed.
+     * @constant {string}
+     */
+    static get DEVICE_DISCONNECTED () {
+        return 'DEVICE_DISCONNECTED';
+    }
+
+    /**
      * Event name to indicate that the microphone is being used to stream audio.
      * @constant {string}
      */
