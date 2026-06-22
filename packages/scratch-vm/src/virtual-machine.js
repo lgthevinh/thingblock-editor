@@ -16,7 +16,8 @@ const Runtime = require('./engine/runtime');
 const StringUtil = require('./util/string-util');
 const formatMessage = require('format-message');
 const generateTargetCode = require('./codegen/generate-code');
-const {DeviceRegistry, deviceClasses} = require('./devices');
+const {DeviceRegistry} = require('./devices');
+const {deviceClasses} = require('./extensions/devices');
 
 const Variable = require('./engine/variable');
 const newBlockIds = require('./util/new-block-ids');

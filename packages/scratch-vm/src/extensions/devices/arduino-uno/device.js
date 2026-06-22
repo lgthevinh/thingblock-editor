@@ -1,6 +1,6 @@
 const formatMessage = require('format-message');
-const Device = require('../device');
-const ConnectionType = require('../connection-type');
+const Device = require('../../../devices/device');
+const ConnectionType = require('../../../devices/connection-type');
 
 /**
  * Arduino Uno (ATmega328P) device.
