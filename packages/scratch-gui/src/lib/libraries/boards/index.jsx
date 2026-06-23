@@ -12,7 +12,9 @@ import noBoardIconURL from './no-board.svg';
 const deviceIcons = {
     arduinoUno: arduinoUnoIconURL,
     arduinoNano: arduinoNanoIconURL,
-    esp32: esp32IconURL
+    esp32: esp32IconURL,
+    // Placeholder: the ESP32-C3 reuses the ESP32 photo until a dedicated icon is added.
+    esp32c3: esp32IconURL
 };
 
 // GUI-only "host mode" tile: deselects the device and runs in the browser. Not a VM device, so it

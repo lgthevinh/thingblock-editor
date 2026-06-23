@@ -1,6 +1,7 @@
 const arduinoUno = require('./arduino-uno');
 const arduinoNano = require('./arduino-nano');
 const esp32 = require('./esp32');
+const esp32c3 = require('./esp32-c3');
 
 /**
  * Every board manifest. Each entry is `{ id, Device, Extension?, getCodeGenerators? }`; boards that
@@ -10,7 +11,8 @@ const esp32 = require('./esp32');
 const boards = [
     arduinoUno,
     arduinoNano,
-    esp32
+    esp32,
+    esp32c3
 ];
 
 module.exports = {
