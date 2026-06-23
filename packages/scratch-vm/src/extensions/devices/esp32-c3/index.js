@@ -1,4 +1,5 @@
 const Esp32C3 = require('./device');
+const iconURL = require('./assets/icon.svg');
 
 /**
  * ESP32-C3 Dev Module board manifest. Data only — it inherits the standard Arduino API from the
@@ -6,5 +7,6 @@ const Esp32C3 = require('./device');
  */
 module.exports = {
     id: 'esp32c3',
+    iconURL,
     Device: Esp32C3
 };

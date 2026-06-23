@@ -4,7 +4,6 @@ import {connect} from 'react-redux';
 import VM from '@scratch/scratch-vm';
 
 import DeviceControlsComponent from '../components/device-controls/device-controls.jsx';
-import {deviceIcons} from '../lib/libraries/boards/index.jsx';
 
 class DeviceControls extends React.Component {
     constructor (props) {
@@ -82,6 +81,9 @@ class DeviceControls extends React.Component {
             projectRunning,
             selectedDeviceId
         } = this.props;
+        const selectedDevice = selectedDeviceId ?
+            this.props.vm.getDeviceList().find(device => device.deviceId === selectedDeviceId) :
+            null;
 
         return (
             <DeviceControlsComponent
@@ -90,7 +92,7 @@ class DeviceControls extends React.Component {
                 dialogOpen={this.state.dialogOpen}
                 scanning={this.state.scanning}
                 boards={this.state.boards}
-                deviceIconURL={deviceIcons[selectedDeviceId]}
+                deviceIconURL={selectedDevice && selectedDevice.iconURL}
                 onRun={this.handleRun}
                 onStop={this.handleStop}
                 onUpload={this.handleUpload}

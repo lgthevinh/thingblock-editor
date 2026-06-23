@@ -17,7 +17,7 @@ const StringUtil = require('./util/string-util');
 const formatMessage = require('format-message');
 const generateTargetCode = require('./codegen/generate-code');
 const {DeviceRegistry} = require('./devices');
-const {deviceClasses} = require('./extensions/devices');
+const {boards} = require('./extensions/devices');
 const LinkClient = require('./link/client/link-client');
 
 const Variable = require('./engine/variable');
@@ -173,8 +173,10 @@ class VirtualMachine extends EventEmitter {
          * @type {DeviceRegistry}
          */
         this.deviceRegistry = new DeviceRegistry();
-        for (const DeviceClass of deviceClasses) {
-            this.deviceRegistry.register(new DeviceClass(this.runtime));
+        this._deviceManifestsById = new Map();
+        for (const board of boards) {
+            const device = this.deviceRegistry.register(new board.Device(this.runtime));
+            this._deviceManifestsById.set(device.deviceId, board);
         }
 
         /**
@@ -1210,14 +1212,18 @@ class VirtualMachine extends EventEmitter {
 
     /**
      * The list of selectable devices for the GUI, each with its presentation info and FQBN.
-     * @returns {Array.<object>} device descriptors: {deviceId, fqbn, name, description,
+     * @returns {Array.<object>} device descriptors: {deviceId, fqbn, iconURL, name, description,
      *   manufacturer, requires, learnMore, help}.
      */
     getDeviceList () {
         return this.deviceRegistry.deviceIds.map(deviceId => {
             const device = this.deviceRegistry.get(deviceId);
+            const manifest = this._deviceManifestsById.get(deviceId);
+            if (!manifest) {
+                throw new Error(`getDeviceList: no device manifest registered for "${deviceId}"`);
+            }
             return Object.assign(
-                {deviceId: device.deviceId, fqbn: device.fqbn},
+                {deviceId: device.deviceId, fqbn: device.fqbn, iconURL: manifest.iconURL},
                 device.getDeviceInfo()
             );
         });

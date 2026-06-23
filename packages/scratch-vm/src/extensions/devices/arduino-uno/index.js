@@ -1,4 +1,5 @@
 const ArduinoUno = require('./device');
+const iconURL = require('./assets/icon.svg');
 
 /**
  * Arduino Uno board manifest. Data only — it inherits the standard Arduino API blocks and codegen
@@ -6,5 +7,6 @@ const ArduinoUno = require('./device');
  */
 module.exports = {
     id: 'arduinoUno',
+    iconURL,
     Device: ArduinoUno
 };

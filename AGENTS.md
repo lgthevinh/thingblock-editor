@@ -137,6 +137,9 @@ Prettier (currently `task-herder`), run `npm run format` in addition to lint.
 
 - Extension entry points live in `src/extensions/`. Each extension exports a class with `getInfo()` and block
   implementation methods.
+- Firmware device manifests live in `src/extensions/devices/`. Board-selection icons belong in each device's
+  `assets/icon.svg` and are exposed through `vm.getDeviceList()` as `iconURL`; do not add GUI-side icon maps for
+  VM devices.
 - i18n strings in extensions are extracted with `format-message`. Run `npm run i18n:src` after changing them.
 
 ## npm workflow

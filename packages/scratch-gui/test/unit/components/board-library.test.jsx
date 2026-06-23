@@ -22,16 +22,19 @@ describe('BoardLibrary', () => {
     vm.getDeviceList = jest.fn(() => [
         {
             deviceId: 'arduinoUno',
+            iconURL: 'vm-arduino-uno.svg',
             name: 'Arduino Uno',
             description: 'The classic board for getting started.'
         },
         {
             deviceId: 'arduinoNano',
+            iconURL: 'vm-arduino-nano.svg',
             name: 'Arduino Nano',
             description: 'A compact board for small projects.'
         },
         {
             deviceId: 'esp32',
+            iconURL: 'vm-esp32.svg',
             name: 'ESP32 Dev Module',
             description: 'A Wi-Fi and Bluetooth capable board.'
         }
@@ -57,11 +60,12 @@ describe('BoardLibrary', () => {
     };
 
     test('renders board names when visible', () => {
-        renderBoardLibrary();
+        const {container} = renderBoardLibrary();
 
         expect(screen.getByRole('button', {name: /Arduino Uno/i})).toBeInTheDocument();
         expect(screen.getByRole('button', {name: /Arduino Nano/i})).toBeInTheDocument();
         expect(screen.getByRole('button', {name: /ESP32 Dev Module/i})).toBeInTheDocument();
+        expect(container.querySelector('img[src="vm-arduino-uno.svg"]')).toBeInTheDocument();
     });
 
     test('configures the library for fixed-size items', () => {

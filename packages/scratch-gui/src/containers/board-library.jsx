@@ -6,7 +6,7 @@ import {connect} from 'react-redux';
 import VM from '@scratch/scratch-vm';
 import intlShape from '../lib/intlShape.js';
 
-import {deviceIcons, noBoardTile} from '../lib/libraries/boards/index.jsx';
+import {noBoardTile} from '../lib/libraries/boards/index.jsx';
 
 import LibraryComponent from '../components/library/library.jsx';
 import DeviceCard from '../components/device-card/device-card.jsx';
@@ -51,12 +51,11 @@ class BoardLibrary extends React.PureComponent {
     render () {
         if (!this.props.visible) return null;
 
-        // The VM owns the device list; the GUI only adds the icon (keyed by deviceId). `rawURL`
-        // gives the library a stable per-item key for items whose name is a localized node.
+        // VM devices own their presentation data. `rawURL` gives the library a stable per-item key
+        // for items whose name is a localized node.
         const devices = this.props.vm.getDeviceList().map(device => ({
             ...device,
-            iconURL: deviceIcons[device.deviceId],
-            rawURL: deviceIcons[device.deviceId]
+            rawURL: device.iconURL
         }));
         const data = [
             {...noBoardTile, rawURL: noBoardTile.iconURL},

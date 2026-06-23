@@ -9,6 +9,12 @@ const common = {
     rootPath: path.resolve(__dirname)
 };
 
+const imageAssetRule = {
+    test: /\.(svg|png|jpg|jpeg|gif)$/,
+    resourceQuery: /^$/,
+    type: 'asset'
+};
+
 const nodeBuilder = new ScratchWebpackConfigBuilder(common)
     .setTarget('node')
     .merge({
@@ -20,7 +26,8 @@ const nodeBuilder = new ScratchWebpackConfigBuilder(common)
                 name: 'VirtualMachine'
             }
         }
-    });
+    })
+    .addModuleRule(imageAssetRule);
 
 const webBuilder = new ScratchWebpackConfigBuilder(common)
     .setTarget('browserslist')
@@ -45,7 +52,8 @@ const webBuilder = new ScratchWebpackConfigBuilder(common)
         options: {
             exposes: 'VirtualMachine'
         }
-    });
+    })
+    .addModuleRule(imageAssetRule);
 
 const playgroundBuilder = webBuilder
     .clone()
