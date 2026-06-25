@@ -48,8 +48,9 @@ dist/thingblock-resource/extensions/
 
 Modules compile to ESM; `libs/` and icons are copied verbatim. The build also writes
 `extensions/index.json` (`{packs:[{kind,path}]}`) because the helper's `ServeDir` serves files, not
-directory listings — the editor reads it to learn which packs exist before importing them. The served
-path is `/resources/thingblock-resource/extensions/<group>/<pack>/…`. The build also writes a versioned archive
+directory listings — the editor reads it to learn which packs exist before importing them. The helper
+roots its `/resources` route at this pack directory, so the served path is
+`/resources/extensions/<group>/<pack>/…` (the pack name is the root, not a path segment). The build also writes a versioned archive
 of the pack, `dist/thingblock-resource_v<major>.<minor>.zip` (e.g. `thingblock-resource_v0.1.zip`), for
 distribution to the helper.
 

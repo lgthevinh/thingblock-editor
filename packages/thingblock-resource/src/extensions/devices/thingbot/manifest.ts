@@ -16,9 +16,9 @@ const manifest: DeviceManifest = {
     default: 'A ThingEdu ESP32-C3 robotics board with Wi-Fi and Bluetooth Low Energy.',
     description: 'Description of the ThingBot device',
   },
-  manufacturer: 'thingedu.com',
+  manufacturer: 'ThingEdu',
   requires: 'serial',
-  learnMore: 'https://thingedu.com',
+  learnMore: 'https://thingedges.com/collections/thing-edu',
   extensions: [
     { kind: 'deviceExtension', path: './extension/manifest.js' },
     { kind: 'peripheral', id: 'servo' },
