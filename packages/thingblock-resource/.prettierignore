@@ -1,0 +1,7 @@
+# Build output and deps.
+dist
+coverage
+node_modules
+
+# Vendored third-party library sources — kept verbatim, never reformatted.
+src/**/libs/**
