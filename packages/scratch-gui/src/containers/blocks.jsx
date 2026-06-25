@@ -2,6 +2,7 @@ import bindAll from 'lodash.bindall';
 import debounce from 'lodash.debounce';
 import defaultsDeep from 'lodash.defaultsdeep';
 import makeToolboxXML from '../lib/make-toolbox-xml';
+import {packCategoryToToolboxXML} from '../lib/device-toolbox-xml';
 import {BOARD_ONLY_CATEGORY_IDS} from '../lib/board-mode';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -57,6 +58,7 @@ class Blocks extends React.Component {
         super(props);
         this.ScratchBlocks = VMScratchBlocks(props.vm);
         bindAll(this, [
+            'activateSelectedDevice',
             'attachVM',
             'detachVM',
             'getToolboxXML',
@@ -102,6 +104,14 @@ class Blocks extends React.Component {
     }
     componentDidMount () {
         this.ScratchBlocks = VMScratchBlocks(this.props.vm, this.props.useCatBlocks);
+        // Share the live scratch-blocks handle so device selection can register pack-served device
+        // extension blocks and codegen against the same singleton this workspace generates from.
+        this.props.vm.setScratchBlocks(this.ScratchBlocks);
+        // Activate the hidden extension of an already-selected device (e.g. a restored selection) and
+        // surface its toolbox categories.
+        if (this.props.selectedDeviceId) {
+            this.activateSelectedDevice();
+        }
         this.ScratchBlocks.dialog.setPrompt(this.handlePromptStart);
         this.ScratchBlocks.StatusIndicatorLabel.statusButtonCallback = this.handleConnectionModalStart;
         this.ScratchBlocks.recordSoundCallback = this.handleOpenSoundRecorder;
@@ -211,12 +221,7 @@ class Blocks extends React.Component {
         // Rebuild the toolbox when board selection changes, since board mode gates which
         // blocks and extension categories appear in the palette.
         if (prevProps.selectedDeviceId !== this.props.selectedDeviceId) {
-            const toolboxXML = this.getToolboxXML();
-            if (toolboxXML) {
-                this.props.updateToolboxState(toolboxXML);
-            }
-            // Selecting a board enables the code view; deselecting clears it.
-            this.updateGeneratedCode();
+            this.activateSelectedDevice();
         }
 
         // Only rerender the toolbox when the blocks are visible and the xml is
@@ -454,12 +459,32 @@ class Blocks extends React.Component {
                 this.props.vm.runtime.getBlocksXML(target),
                 this.props.colorMode
             ).filter(category => boardMode || !BOARD_ONLY_CATEGORY_IDS.includes(category.id));
+            // Append the selected device extension's categories, then its referenced peripherals'
+            // (both empty in host mode, since the registries clear when no device is selected).
+            for (const category of this.props.vm.getActiveDeviceToolboxCategories()) {
+                dynamicBlocksXML.push(packCategoryToToolboxXML(category, 'device'));
+            }
+            for (const category of this.props.vm.getActivePeripheralToolboxCategories()) {
+                dynamicBlocksXML.push(packCategoryToToolboxXML(category, 'peripheral'));
+            }
             return makeToolboxXML(false, target.isStage, target.id, dynamicBlocksXML,
                 getColorsForMode(this.props.colorMode), boardMode
             );
         } catch {
             return null;
         }
+    }
+    activateSelectedDevice () {
+        // Activate the device's hidden extension first (registers its blocks/codegen), then rebuild the
+        // toolbox so the device's categories appear. selectDevice(null) clears, rebuilding to host mode.
+        return this.props.vm.selectDevice(this.props.selectedDeviceId).then(() => {
+            const toolboxXML = this.getToolboxXML();
+            if (toolboxXML) {
+                this.props.updateToolboxState(toolboxXML);
+            }
+            // Selecting a board enables the code view; deselecting clears it.
+            this.updateGeneratedCode();
+        });
     }
     onWorkspaceUpdate (data) {
         // When we change sprites, update the toolbox to have the new sprite's blocks

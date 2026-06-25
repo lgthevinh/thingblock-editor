@@ -440,3 +440,4 @@ const makeToolboxXML = function (isInitialSetup, isStage = true, targetId, categ
 };
 
 export default makeToolboxXML;
+export {xmlEscape};
