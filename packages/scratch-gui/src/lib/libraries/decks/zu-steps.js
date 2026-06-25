@@ -85,12 +85,6 @@ import storySwitchBackdrop from './steps/story-switch-backdrop.zu.png';
 import storyHideCharacter from './steps/story-hide-character.zu.png';
 import storyShowCharacter from './steps/story-show-character.zu.png';
 
-// Video Sensing
-import videoAddExtension from './steps/video-add-extension.zu.gif';
-import videoPet from './steps/video-pet.zu.png';
-import videoAnimate from './steps/video-animate.zu.png';
-import videoPop from './steps/video-pop.zu.png';
-
 // Make it Fly
 import flyChooseBackdrop from './steps/fly-choose-backdrop.LTR.gif';
 import flyChooseCharacter from './steps/fly-choose-character.LTR.png';
@@ -286,12 +280,6 @@ const zuImages = {
     storySwitchBackdrop: storySwitchBackdrop,
     storyHideCharacter: storyHideCharacter,
     storyShowCharacter: storyShowCharacter,
-
-    // Video Sensing
-    videoAddExtension: videoAddExtension,
-    videoPet: videoPet,
-    videoAnimate: videoAnimate,
-    videoPop: videoPop,
 
     // Make it Fly
     flyChooseBackdrop: flyChooseBackdrop,

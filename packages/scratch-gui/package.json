@@ -123,14 +123,12 @@
     ]
   },
   "dependencies": {
-    "@mediapipe/face_detection": "0.4.1646425229",
     "@microbit/microbit-universal-hex": "0.2.2",
     "@radix-ui/react-context-menu": "2.3.0",
     "@scratch/scratch-render": "14.1.0",
     "@scratch/scratch-storage": "14.1.0",
     "@scratch/scratch-svg-renderer": "14.1.0",
     "@scratch/scratch-vm": "14.1.0",
-    "@tensorflow-models/face-detection": "1.0.3",
     "@tensorflow/tfjs": "4.22.0",
     "@testing-library/user-event": "14.6.1",
     "arraybuffer-loader": "1.0.8",

@@ -2,8 +2,6 @@ import musicIcon from './extensions/musicIcon.svg';
 import penIcon from './extensions/penIcon.svg';
 import text2speechIcon from './extensions/text2speechIcon.svg';
 import translateIcon from './extensions/translateIcon.svg';
-import videoSensingIcon from './extensions/videoSensingIcon.svg';
-import faceSensingIcon from './extensions/faceSensingIcon.svg';
 
 // This object is passed directly to Blockly, hence the colour* fields need to
 // be named exactly as they are, including the UK spelling of "colour".
@@ -100,12 +98,6 @@ const extensions = {
     },
     translate: {
         blockIconURI: translateIcon
-    },
-    videoSensing: {
-        blockIconURI: videoSensingIcon
-    },
-    faceSensing: {
-        blockIconURI: faceSensingIcon
     }
 };
 

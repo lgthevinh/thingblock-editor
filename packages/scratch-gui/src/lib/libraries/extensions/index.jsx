@@ -7,17 +7,11 @@ import musicInsetIconURL from './music/music-small.svg';
 import penIconURL from './pen/pen.png';
 import penInsetIconURL from './pen/pen-small.svg';
 
-import videoSensingIconURL from './videoSensing/video-sensing.png';
-import videoSensingInsetIconURL from './videoSensing/video-sensing-small.svg';
-
 import text2speechIconURL from './text2speech/text2speech.png';
 import text2speechInsetIconURL from './text2speech/text2speech-small.svg';
 
 import translateIconURL from './translate/translate.png';
 import translateInsetIconURL from './translate/translate-small.png';
-
-import faceSensingIconURL from './faceSensing/faceSensing.png';
-import faceSensingInsetIconURL from './faceSensing/faceSensing-small.svg';
 
 import thingbotTelemetrixIconURL from './thingbotTelemetrix/thingbot-telemetrix.svg';
 import thingbotTelemetrixInsetIconURL from './thingbotTelemetrix/thingbot-telemetrix-small.svg';
@@ -59,46 +53,6 @@ export default [
                 defaultMessage="Draw with your sprites."
                 description="Description for the 'Pen' extension"
                 id="gui.extension.pen.description"
-            />
-        ),
-        featured: true
-    },
-    {
-        name: (
-            <FormattedMessage
-                defaultMessage="Video Sensing"
-                description="Name for the 'Video Sensing' extension"
-                id="gui.extension.videosensing.name"
-            />
-        ),
-        extensionId: 'videoSensing',
-        iconURL: videoSensingIconURL,
-        insetIconURL: videoSensingInsetIconURL,
-        description: (
-            <FormattedMessage
-                defaultMessage="Sense motion with the camera."
-                description="Description for the 'Video Sensing' extension"
-                id="gui.extension.videosensing.description"
-            />
-        ),
-        featured: true
-    },
-    {
-        name: (
-            <FormattedMessage
-                defaultMessage="Face Sensing"
-                description="Name for the 'Face Sensing' extension"
-                id="gui.extension.faceSensing.name"
-            />
-        ),
-        extensionId: 'faceSensing',
-        iconURL: faceSensingIconURL,
-        insetIconURL: faceSensingInsetIconURL,
-        description: (
-            <FormattedMessage
-                defaultMessage="Sense faces with the camera."
-                description="Description for the 'Face Sensing' extension"
-                id="gui.extension.faceSensing.description"
             />
         ),
         featured: true

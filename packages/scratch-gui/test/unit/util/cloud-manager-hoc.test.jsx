@@ -150,44 +150,6 @@ describe('CloudManagerHOC', () => {
         expect(CloudProvider).not.toHaveBeenCalled();
     });
 
-    test('when videoSensing extension is active, the cloud provider is not set on the vm', () => {
-        const Component = () => <div />;
-        const WrappedComponent = cloudManagerHOC(Component);
-        vm.extensionManager.isExtensionLoaded = jest.fn(extension => extension === 'videoSensing');
-
-        render(
-            <WrappedComponent
-                hasCloudPermission
-                cloudHost="nonEmpty"
-                store={store}
-                username="user"
-                vm={vm}
-            />
-        );
-
-        expect(vm.setCloudProvider.mock.calls.length).toBe(0);
-        expect(CloudProvider).not.toHaveBeenCalled();
-    });
-
-    test('when faceSensing extension is active, the cloud provider is not set on the vm', () => {
-        const Component = () => <div />;
-        const WrappedComponent = cloudManagerHOC(Component);
-        vm.extensionManager.isExtensionLoaded = jest.fn(extension => extension === 'faceSensing');
-
-        render(
-            <WrappedComponent
-                hasCloudPermission
-                cloudHost="nonEmpty"
-                store={store}
-                username="user"
-                vm={vm}
-            />
-        );
-
-        expect(vm.setCloudProvider.mock.calls.length).toBe(0);
-        expect(CloudProvider).not.toHaveBeenCalled();
-    });
-
     test('if the isShowingWithId prop becomes true, it sets the cloud provider on the vm', () => {
         const Component = () => <div />;
         const WrappedComponent = cloudManagerHOC(Component);

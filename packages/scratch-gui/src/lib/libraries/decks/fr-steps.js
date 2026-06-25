@@ -85,12 +85,6 @@ import storySwitchBackdrop from './steps/story-switch-backdrop.fr.png';
 import storyHideCharacter from './steps/story-hide-character.fr.png';
 import storyShowCharacter from './steps/story-show-character.fr.png';
 
-// Video Sensing
-import videoAddExtension from './steps/video-add-extension.fr.gif';
-import videoPet from './steps/video-pet.fr.png';
-import videoAnimate from './steps/video-animate.fr.png';
-import videoPop from './steps/video-pop.fr.png';
-
 // Make it Fly
 import flyChooseBackdrop from './steps/fly-choose-backdrop.LTR.gif';
 import flyChooseCharacter from './steps/fly-choose-character.LTR.png';
@@ -286,12 +280,6 @@ const frImages = {
     storySwitchBackdrop: storySwitchBackdrop,
     storyHideCharacter: storyHideCharacter,
     storyShowCharacter: storyShowCharacter,
-
-    // Video Sensing
-    videoAddExtension: videoAddExtension,
-    videoPet: videoPet,
-    videoAnimate: videoAnimate,
-    videoPop: videoPop,
 
     // Make it Fly
     flyChooseBackdrop: flyChooseBackdrop,

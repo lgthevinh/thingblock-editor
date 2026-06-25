@@ -264,19 +264,14 @@ const parseMonitorObject = (object, runtime, targets, extensions) => {
         log.warn(`Could not find monitor block with opcode: ${object.cmd}`);
         return;
     }
-    // In scratch 2.0, there are two monitors that now correspond to extension
-    // blocks (tempo and video motion/direction). In the case of the
-    // video motion/direction block, this reporter is not monitorable in Scratch 3.0.
-    // In the case of the tempo block, we should import it and load the music extension
-    // only when the monitor is actually visible.
+    // In Scratch 2.0, the tempo monitor now corresponds to a Scratch 3.0 extension
+    // block. Import it and load the music extension only when the monitor is visible.
 
     const opcode = specMap[object.cmd].opcode;
     const extIndex = opcode.indexOf('_');
     const extID = opcode.substring(0, extIndex);
 
-    if (extID === 'videoSensing') {
-        return;
-    } else if (CORE_EXTENSIONS.indexOf(extID) === -1 && extID !== '' &&
+    if (CORE_EXTENSIONS.indexOf(extID) === -1 && extID !== '' &&
         !extensions.extensionIDs.has(extID) && !object.visible) {
         // Don't import this monitor if it refers to a non-core extension that
         // doesn't exist anywhere else in the project and it isn't visible.
@@ -1086,18 +1081,6 @@ const parseBlock = function (sb2block, addBroadcastMsg, getVariableId, extension
             } else if (expectedArg.inputOp === 'music.menu.INSTRUMENT') {
                 if (shadowObscured) {
                     fieldValue = 1;
-                }
-            } else if (expectedArg.inputOp === 'videoSensing.menu.ATTRIBUTE') {
-                if (shadowObscured) {
-                    fieldValue = 'motion';
-                }
-            } else if (expectedArg.inputOp === 'videoSensing.menu.SUBJECT') {
-                if (shadowObscured) {
-                    fieldValue = 'this sprite';
-                }
-            } else if (expectedArg.inputOp === 'videoSensing.menu.VIDEO_STATE') {
-                if (shadowObscured) {
-                    fieldValue = 'on';
                 }
             } else if (shadowObscured) {
                 // Filled drop-down menu.

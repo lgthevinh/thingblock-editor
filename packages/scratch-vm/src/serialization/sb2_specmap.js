@@ -703,21 +703,6 @@ const specMap = {
             }
         ]
     },
-    'senseVideoMotion': {
-        opcode: 'videoSensing_videoOn',
-        argMap: [
-            {
-                type: 'input',
-                inputOp: 'videoSensing_menu_ATTRIBUTE',
-                inputName: 'ATTRIBUTE'
-            },
-            {
-                type: 'input',
-                inputOp: 'videoSensing_menu_SUBJECT',
-                inputName: 'SUBJECT'
-            }
-        ]
-    },
     'whenGreenFlag': {
         opcode: 'event_whenflagclicked',
         argMap: [
@@ -746,35 +731,19 @@ const specMap = {
             }
         ]
     },
-    'whenSensorGreaterThan': ([, sensor]) => {
-        if (sensor === 'video motion') {
-            return {
-                opcode: 'videoSensing_whenMotionGreaterThan',
-                argMap: [
-                    // skip the first arg, since we converted to a video specific sensing block
-                    {},
-                    {
-                        type: 'input',
-                        inputOp: 'math_number',
-                        inputName: 'REFERENCE'
-                    }
-                ]
-            };
-        }
-        return {
-            opcode: 'event_whengreaterthan',
-            argMap: [
-                {
-                    type: 'field',
-                    fieldName: 'WHENGREATERTHANMENU'
-                },
-                {
-                    type: 'input',
-                    inputOp: 'math_number',
-                    inputName: 'VALUE'
-                }
-            ]
-        };
+    'whenSensorGreaterThan': {
+        opcode: 'event_whengreaterthan',
+        argMap: [
+            {
+                type: 'field',
+                fieldName: 'WHENGREATERTHANMENU'
+            },
+            {
+                type: 'input',
+                inputOp: 'math_number',
+                inputName: 'VALUE'
+            }
+        ]
     },
     'whenIReceive': {
         opcode: 'event_whenbroadcastreceived',
@@ -1084,41 +1053,6 @@ const specMap = {
     'isLoud': {
         opcode: 'sensing_loud',
         argMap: [
-        ]
-    },
-    // 'senseVideoMotion': {
-    //     opcode: 'sensing_videoon',
-    //     argMap: [
-    //         {
-    //             type: 'input',
-    //             inputOp: 'sensing_videoonmenuone',
-    //             inputName: 'VIDEOONMENU1'
-    //         },
-    //         {
-    //             type: 'input',
-    //             inputOp: 'sensing_videoonmenutwo',
-    //             inputName: 'VIDEOONMENU2'
-    //         }
-    //     ]
-    // },
-    'setVideoState': {
-        opcode: 'videoSensing_videoToggle',
-        argMap: [
-            {
-                type: 'input',
-                inputOp: 'videoSensing_menu_VIDEO_STATE',
-                inputName: 'VIDEO_STATE'
-            }
-        ]
-    },
-    'setVideoTransparency': {
-        opcode: 'videoSensing_setVideoTransparency',
-        argMap: [
-            {
-                type: 'input',
-                inputOp: 'math_number',
-                inputName: 'TRANSPARENCY'
-            }
         ]
     },
     'timer': {

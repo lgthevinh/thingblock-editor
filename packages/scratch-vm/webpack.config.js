@@ -68,8 +68,6 @@ const playgroundBuilder = webBuilder
         },
         entry: {
             'benchmark': './src/playground/benchmark',
-            'video-sensing-extension-debug':
-                './src/extensions/scratch3_video_sensing/debug',
             'extension-worker': path.join(
                 __dirname,
                 'src/extension-support/extension-worker.js'
@@ -85,15 +83,6 @@ const playgroundBuilder = webBuilder
     .addModuleRule({
         test: require.resolve('stats.js/build/stats.min.js'),
         loader: 'script-loader'
-    })
-    .addModuleRule({
-        test: require.resolve(
-            './src/extensions/scratch3_video_sensing/debug.js'
-        ),
-        loader: 'expose-loader',
-        options: {
-            exposes: 'Scratch3VideoSensingDebug'
-        }
     })
     .addModuleRule({
         test: require.resolve('@scratch/scratch-blocks'),

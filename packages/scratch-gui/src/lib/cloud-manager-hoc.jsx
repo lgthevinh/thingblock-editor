@@ -26,12 +26,10 @@ const cloudManagerHOC = function (WrappedComponent) {
 
             this.cloudProvider = null;
             bindAll(this, [
-                'handleCloudDataUpdate',
-                'handleExtensionAdded'
+                'handleCloudDataUpdate'
             ]);
 
             this.props.vm.on('HAS_CLOUD_DATA_UPDATE', this.handleCloudDataUpdate);
-            this.props.vm.on('EXTENSION_ADDED', this.handleExtensionAdded);
         }
         componentDidMount () {
             if (this.shouldConnect(this.props)) {
@@ -54,7 +52,6 @@ const cloudManagerHOC = function (WrappedComponent) {
         componentWillUnmount () {
             // Make sure to clean up old handlers as otherwise we end up with multiple connections at the same time
             this.props.vm.off('HAS_CLOUD_DATA_UPDATE', this.handleCloudDataUpdate);
-            this.props.vm.off('EXTENSION_ADDED', this.handleExtensionAdded);
 
             this.disconnectFromCloud();
         }
@@ -119,17 +116,6 @@ const cloudManagerHOC = function (WrappedComponent) {
                 this.connectToCloud();
             }
         }
-        handleExtensionAdded (categoryInfo) {
-            // Note that props.vm.extensionManager.isExtensionLoaded('videoSensing') is still false
-            // at the point of this callback, so it is difficult to reuse the canModifyCloudData logic.
-            if (
-                (categoryInfo.id === 'videoSensing' ||
-                    categoryInfo.id === 'faceSensing') &&
-                this.isConnected()
-            ) {
-                this.disconnectFromCloud();
-            }
-        }
         render () {
             const {
 
@@ -186,17 +172,8 @@ const cloudManagerHOC = function (WrappedComponent) {
             projectId: state.scratchGui.projectState.projectId,
             // if you're editing someone else's project, you can't modify cloud data
             canModifyCloudData:
-                (!state.scratchGui.mode.hasEverEnteredEditor ||
-                    ownProps.canSave) &&
-                // possible security concern if the program attempts to encode webcam data over cloud variables
-                !(
-                    ownProps.vm.extensionManager.isExtensionLoaded(
-                        'videoSensing'
-                    ) ||
-                    ownProps.vm.extensionManager.isExtensionLoaded(
-                        'faceSensing'
-                    )
-                )
+                !state.scratchGui.mode.hasEverEnteredEditor ||
+                ownProps.canSave
         };
     };
 

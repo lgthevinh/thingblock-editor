@@ -109,10 +109,6 @@ const baseConfig = new ScratchWebpackConfigBuilder(
                 context: '../../node_modules/@scratch/scratch-storage/dist/web',
                 from: 'chunks/vendors-*.{js,js.map}',
                 noErrorOnMissing: true
-            },
-            {
-                from: '../../node_modules/@mediapipe/face_detection',
-                to: 'chunks/mediapipe/face_detection'
             }
         ]
     }));
