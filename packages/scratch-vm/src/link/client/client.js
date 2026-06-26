@@ -76,10 +76,13 @@ class Client {
      * Build firmware for the device from generated source, streaming progress and build log as it goes.
      * @param {Device} device - the selected device (supplies fqbn and compile config).
      * @param {string} source - the generated Arduino C++ source.
-     * @param {CompileHandlers} [handlers] - optional `{onLog, onProgress}` streaming callbacks.
+     * @param {Array.<{pack: string, lib: string}>} [libs] - vendored-library references the backend
+     *   resolves from its resource root (no lib bytes cross the link).
+     * @param {import('./callbacks').CompileCallbacks} [callbacks] - optional `{onLog, onProgress}`
+     *   streaming callbacks.
      * @returns {Promise<Artifact>} the compiled binary.
      */
-    compile (device, source, handlers) {
+    compile (device, source, libs, callbacks) {
         throw new Error(`${this.constructor.name} must implement compile()`);
     }
 
@@ -87,10 +90,10 @@ class Client {
      * Flash a compiled artifact to the connected device, streaming progress as it goes.
      * @param {Device} device - the selected device (supplies upload config).
      * @param {Artifact} artifact - the binary produced by `compile()`.
-     * @param {{onProgress: function}} [handlers] - optional progress callback.
+     * @param {{onProgress: function}} [callbacks] - optional progress callback.
      * @returns {Promise<void>} resolves once flashed.
      */
-    flash (device, artifact, handlers) {
+    flash (device, artifact, callbacks) {
         throw new Error(`${this.constructor.name} must implement flash()`);
     }
 
@@ -131,18 +134,14 @@ class Client {
  */
 
 /**
- * A compiled firmware binary handed from `compile()` to `flash()`.
+ * A compiled firmware binary handed from `compile()` to `flash()`. The payload is backend-specific:
+ * the helper keeps the binary on disk and carries its `path` (no bytes over the WS), while the web
+ * backend carries the bytes in `data`.
  * @typedef {object} Artifact
  * @property {string} format - binary format, 'bin' (ESP) or 'hex' (AVR).
- * @property {*} data - the binary payload.
+ * @property {string} [path] - filesystem path to the binary (helper backend).
+ * @property {*} [data] - the binary payload (web backend).
  * @property {number} [offset] - flash offset, when the format requires one.
- */
-
-/**
- * Streaming callbacks for `compile()`.
- * @typedef {object} CompileHandlers
- * @property {function(string):void} [onLog] - receives each stdout/stderr chunk.
- * @property {function({phase: string, percent: number}):void} [onProgress] - receives progress updates.
  */
 
 module.exports = Client;

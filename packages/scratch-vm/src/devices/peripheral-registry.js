@@ -81,8 +81,9 @@ class PeripheralRegistry {
     }
 
     /**
-     * The active peripherals' vendored libs, for compile-time include resolution.
-     * @returns {Array.<object>} lib refs across all active peripherals.
+     * The active peripherals' vendored libs, for compile-time include resolution. Each ref is
+     * `{pack, lib}`, the shape the helper resolves against its resource root.
+     * @returns {Array.<{pack: string, lib: string}>} lib refs across all active peripherals.
      */
     getActivePeripheralLibs () {
         const libs = [];

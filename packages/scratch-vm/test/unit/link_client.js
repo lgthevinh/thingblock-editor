@@ -88,11 +88,16 @@ const roundTrip = async (socket, sentIndex, payload = {}) => {
 };
 
 /**
- * A stub device exposing only the upload config LinkClient reads.
+ * A stub device exposing the upload config, fqbn, and compile config LinkClient reads.
  * @param {Array.<string>} pnpid - the device's accepted USB PNP ids.
- * @returns {{getUploadConfig: function}} the stub device.
+ * @param {{fqbn?: string, options?: object}} [compile] - the fqbn and board-menu option selections.
+ * @returns {{getUploadConfig: function, fqbn: string, getCompileConfig: function}} the stub device.
  */
-const stubDevice = pnpid => ({getUploadConfig: () => ({pnpid})});
+const stubDevice = (pnpid, {fqbn = 'arduino:avr:uno', options = {}} = {}) => ({
+    getUploadConfig: () => ({pnpid}),
+    fqbn,
+    getCompileConfig: () => ({options})
+});
 
 test('listBoards sends a listBoards envelope with the device pnpid', t => {
     const {client, sockets} = makeClient();
@@ -235,6 +240,109 @@ test('a socket close while connected emits DEVICE_DISCONNECTED', async t => {
 
     t.equal(client.isConnected, false, 'isConnected falls back to false');
     t.same(runtime.emitted, ['DEVICE_CONNECTED', 'DEVICE_DISCONNECTED']);
+});
+
+test('compile sends a compile envelope with the composed fqbn and source', async t => {
+    const {client, sockets} = makeClient();
+    const promise = client.compile(
+        stubDevice([], {fqbn: 'esp32:esp32:esp32', options: {PartitionScheme: 'huge_app'}}),
+        'void setup(){}'
+    );
+
+    sockets[0].emitOpen();
+    await flush();
+    const frame = sockets[0].sent[0];
+    t.equal(frame.type, 'compile');
+    t.equal(frame.payload.fqbn, 'esp32:esp32:esp32:PartitionScheme=huge_app',
+        'board-menu options fold onto the fqbn');
+    t.same(frame.payload.options, {}, 'options payload is empty until libs/warnings land');
+    t.equal(frame.payload.source, 'void setup(){}');
+    t.same(frame.payload.libs, [], 'libs default to an empty list');
+
+    sockets[0].emitMessage({
+        id: frame.id,
+        type: 'result',
+        payload: {artifact: {format: 'bin', path: '/tmp/sketch.bin'}}
+    });
+    const artifact = await promise;
+    t.same(artifact, {format: 'bin', path: '/tmp/sketch.bin'}, 'resolves the helper artifact');
+    t.end();
+});
+
+test('compile forwards vendored lib references in the envelope', async t => {
+    const {client, sockets} = makeClient();
+    const libs = [{pack: 'extensions/peripheral/servo', lib: 'libs/Servo'}];
+    const promise = client.compile(stubDevice([]), 'src', libs);
+
+    sockets[0].emitOpen();
+    await flush();
+    const frame = sockets[0].sent[0];
+    t.same(frame.payload.libs, libs, 'libs ride along untouched for the helper to resolve');
+
+    sockets[0].emitMessage({id: frame.id, type: 'result', payload: {artifact: {format: 'bin', path: '/p'}}});
+    await promise;
+    t.end();
+});
+
+test('compile streams log and progress to callbacks, then resolves the artifact', async t => {
+    const {client, sockets} = makeClient();
+    const logs = [];
+    const progress = [];
+    const promise = client.compile(stubDevice([]), 'src', [], {
+        onLog: chunk => logs.push(chunk),
+        onProgress: p => progress.push(p)
+    });
+
+    sockets[0].emitOpen();
+    await flush();
+    const {id} = sockets[0].sent[0];
+    sockets[0].emitMessage({id, type: 'log', payload: {chunk: 'Compiling...'}});
+    sockets[0].emitMessage({id, type: 'progress', payload: {phase: 'compile', percent: 50}});
+    sockets[0].emitMessage({id, type: 'result', payload: {artifact: {format: 'hex', path: '/tmp/a.hex'}}});
+
+    const artifact = await promise;
+    t.same(logs, ['Compiling...'], 'log frames route to onLog');
+    t.same(progress, [{phase: 'compile', percent: 50}], 'progress frames route to onProgress');
+    t.same(artifact, {format: 'hex', path: '/tmp/a.hex'});
+    t.end();
+});
+
+test('compile tolerates streaming frames when no callbacks are given', async t => {
+    const {client, sockets} = makeClient();
+    const promise = client.compile(stubDevice([]), 'src');
+
+    sockets[0].emitOpen();
+    await flush();
+    const {id} = sockets[0].sent[0];
+    sockets[0].emitMessage({id, type: 'log', payload: {chunk: 'x'}});
+    sockets[0].emitMessage({id, type: 'result', payload: {artifact: {format: 'bin', path: '/p'}}});
+
+    await promise;
+    t.pass('streamed frames with no callbacks do not throw');
+    t.end();
+});
+
+test('a compile error rejects the request', t => {
+    const {client, sockets} = makeClient();
+    const promise = client.compile(stubDevice([]), 'src');
+
+    sockets[0].emitOpen();
+    flush().then(() => {
+        sockets[0].emitMessage({
+            id: sockets[0].sent[0].id,
+            type: 'error',
+            payload: {code: 'daemon', message: 'compile failed'}
+        });
+    });
+
+    promise.then(
+        () => t.fail('should not resolve'),
+        err => {
+            t.equal(err.code, 'daemon');
+            t.match(err.message, /compile failed/);
+            t.end();
+        }
+    );
 });
 
 test('concurrent requests share one lazily-opened socket', t => {

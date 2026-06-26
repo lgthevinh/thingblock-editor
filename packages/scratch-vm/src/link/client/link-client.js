@@ -1,4 +1,5 @@
 const Client = require('./client');
+const {withDefaults} = require('./callbacks');
 const log = require('../../util/log');
 
 /**
@@ -15,8 +16,9 @@ const DEFAULT_URL = 'ws://localhost:3030/';
  *
  * One socket carries every operation. A request's `id` correlates it with its streamed responses
  * (`log` / `progress`) and its single terminal reply (`result` or `error`). Of the {@link Client}
- * contract, `listBoards`, `connect`, and `disconnect` are wired today; the helper answers the rest
- * with `error{unimplemented}` until their milestone lands, so those methods inherit the base throw.
+ * contract, `listBoards`, `connect`, `disconnect`, and `compile` are wired today; the helper answers
+ * the rest with `error{unimplemented}` until their milestone lands, so those methods inherit the base
+ * throw.
  *
  * `connect` is helper-side session state — the helper records the selected port on its own socket,
  * with no daemon round-trip — so a dropped socket means the helper has forgotten the port. The close
@@ -118,17 +120,59 @@ class LinkClient extends Client {
     }
 
     /**
+     * Build firmware via the helper, streaming `log`/`progress` to `callbacks` until the helper replies
+     * with the located artifact. The helper keeps the binary on disk, so the artifact carries a `path`
+     * (not bytes) that `flash()` hands back to the helper's `upload`. Vendored libs travel as `{pack, lib}`
+     * references the helper resolves from its resource root — no lib bytes cross the socket.
+     * @param {Device} device - the selected device (supplies fqbn and compile config).
+     * @param {string} source - the generated Arduino C++ source.
+     * @param {Array.<{pack: string, lib: string}>} [libs] - vendored-library references.
+     * @param {import('./callbacks').CompileCallbacks} [callbacks] - optional `{onLog, onProgress}`.
+     * @returns {Promise<Artifact>} the compiled artifact `{format, path}`.
+     */
+    async compile (device, source, libs = [], callbacks) {
+        const fqbn = this._composeFqbn(device);
+        log.info(`LinkClient.compile: requesting build for ${fqbn} with ${libs.length} vendored lib(s)`);
+        const {artifact} = await this._request(
+            'compile',
+            {fqbn, options: {}, source, libs},
+            withDefaults(callbacks)
+        );
+        log.info(`LinkClient.compile: artifact ready (format=${artifact.format})`);
+        return artifact;
+    }
+
+    /**
+     * Build the arduino-cli FQBN, folding the device's board-menu option selections
+     * (`getCompileConfig().options`, e.g. `PartitionScheme`) onto the base fqbn as `:k1=v1,k2=v2`.
+     * arduino-cli takes these as part of the FQBN, not as separate compile options.
+     * @param {Device} device - the selected device.
+     * @returns {string} the composed FQBN.
+     * @private
+     */
+    _composeFqbn (device) {
+        const {options = {}} = device.getCompileConfig();
+        const keys = Object.keys(options);
+        if (keys.length === 0) return device.fqbn;
+        const menu = keys.map(key => `${key}=${options[key]}`).join(',');
+        return `${device.fqbn}:${menu}`;
+    }
+
+    /**
      * Send one request envelope and resolve with its terminal `result` payload (or reject on `error`).
-     * Opens the socket on first use.
+     * Opens the socket on first use. When `callbacks` is given, streamed `log`/`progress` frames for
+     * this request are routed to it until the terminal reply settles the promise.
      * @param {string} type - the request type (e.g. 'listBoards').
      * @param {object} payload - the request payload.
+     * @param {{onLog: function, onProgress: function}} [callbacks] - streaming callbacks for this
+     *   request (already defaulted via {@link withDefaults}); omitted for non-streaming requests.
      * @returns {Promise<object>} the `result` payload.
      * @private
      */
-    _request (type, payload) {
+    _request (type, payload, callbacks) {
         const id = String(this._nextId++);
         const promise = new Promise((resolve, reject) => {
-            this._pending.set(id, {resolve, reject});
+            this._pending.set(id, {resolve, reject, callbacks});
         });
         this._ensureOpen()
             .then(() => this._ws.send(JSON.stringify({id, type, payload})))
@@ -166,8 +210,8 @@ class LinkClient extends Client {
 
     /**
      * Route an inbound frame to its pending request. Terminal `result`/`error` settle the request;
-     * streaming `log`/`progress`/`event`/`monitorData` frames are ignored until their milestone wires
-     * per-request handlers.
+     * streaming `log`/`progress` frames go to the request's callbacks without settling. `event` and
+     * `monitorData` frames are ignored until the serial-monitor milestone wires them.
      * @param {string} raw - the JSON text frame.
      * @private
      */
@@ -181,6 +225,16 @@ class LinkClient extends Client {
         }
         const {id, type, payload} = message;
         switch (type) {
+        case 'log': {
+            const pending = this._pending.get(id);
+            if (pending && pending.callbacks) pending.callbacks.onLog(payload.chunk);
+            break;
+        }
+        case 'progress': {
+            const pending = this._pending.get(id);
+            if (pending && pending.callbacks) pending.callbacks.onProgress(payload);
+            break;
+        }
         case 'result':
             this._settle(id, {resolve: payload});
             break;

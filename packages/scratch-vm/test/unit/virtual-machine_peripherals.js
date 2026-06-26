@@ -143,8 +143,11 @@ test('selectDevice registers each referenced peripheral\'s blocks and codegen on
     );
     t.same(
         vm.getActivePeripheralLibs(),
-        [{path: 'libs/ThingBot'}, {path: 'libs/Servo'}],
-        'libs aggregate across active peripherals in order'
+        [
+            {pack: 'extensions/peripheral/thingbot-core', lib: 'libs/ThingBot'},
+            {pack: 'extensions/peripheral/servo', lib: 'libs/Servo'}
+        ],
+        'libs aggregate across active peripherals in order, as helper-resolvable {pack, lib} refs'
     );
 
     t.end();
@@ -176,7 +179,10 @@ test('records peripherals headless: toolbox/libs recorded, blocks skipped', asyn
     t.same(vm.getActivePeripheralToolboxCategories(), [coreToolbox, servoToolbox], 'toolbox recorded without a handle');
     t.same(
         vm.getActivePeripheralLibs(),
-        [{path: 'libs/ThingBot'}, {path: 'libs/Servo'}],
+        [
+            {pack: 'extensions/peripheral/thingbot-core', lib: 'libs/ThingBot'},
+            {pack: 'extensions/peripheral/servo', lib: 'libs/Servo'}
+        ],
         'libs recorded without a handle'
     );
     t.notOk(counts[`${coreBase}/blocks.js`], 'did not import core blocks without a handle');

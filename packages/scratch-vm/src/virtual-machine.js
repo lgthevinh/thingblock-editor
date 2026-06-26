@@ -1628,7 +1628,11 @@ class VirtualMachine extends EventEmitter {
                     `${base}/${manifest.toolbox.replace(/^\.\//, '')}`
                 )).default;
             }
-            const libs = manifest.libs || [];
+            // Compile lib references the helper resolves from its resource root: `pack` is this pack's
+            // directory relative to that root (the path after `/resources/` in its served base), `lib`
+            // the manifest's lib directory within the pack. The helper joins root/pack/lib in place.
+            const packPath = base.split('/resources/')[1];
+            const libs = (manifest.libs || []).map(lib => ({pack: packPath, lib: lib.path}));
             if (this._scratchBlocks && manifest.blocks) {
                 const {registerBlocks} = await this._importPackModule(
                     `${base}/${manifest.blocks.replace(/^\.\//, '')}`
@@ -1686,6 +1690,24 @@ class VirtualMachine extends EventEmitter {
      */
     connectBoard (target) {
         return this.client.connect(target);
+    }
+
+    /**
+     * Compile generated firmware source for the selected device via the active link client, streaming
+     * build log and progress to the optional callbacks. The active peripherals' vendored libs are
+     * passed as references the helper resolves from its resource root (no lib bytes cross the link).
+     * @param {string} deviceId - the selected device's id (from `getDeviceList()`).
+     * @param {string} source - the generated Arduino C++ source.
+     * @param {import('./link/client/callbacks').CompileCallbacks} [callbacks] - optional
+     *   `{onLog, onProgress}` streaming callbacks.
+     * @returns {Promise<object>} the compiled artifact `{format, path}`.
+     */
+    compile (deviceId, source, callbacks) {
+        const device = this.deviceRegistry.get(deviceId);
+        if (!device) {
+            return Promise.reject(new Error(`compile: no device registered for "${deviceId}"`));
+        }
+        return this.client.compile(device, source, this.getActivePeripheralLibs(), callbacks);
     }
 
     /**
