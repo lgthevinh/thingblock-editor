@@ -2,7 +2,7 @@
  * ThingBot-exclusive block definitions. Registered against the editor's injected Blockly instance.
  */
 import type { Block } from '@scratch/scratch-blocks'
-import type { RegisterBlocks } from '../../../../shared/types'
+import type { RegisterBlocks } from '../../../shared/types'
 
 export const registerBlocks: RegisterBlocks = (Blockly) => {
   Blockly.Blocks.thingbot_digitalwrite = {

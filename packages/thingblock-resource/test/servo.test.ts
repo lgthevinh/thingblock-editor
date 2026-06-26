@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { registerBlocks as registerThingbotBlocks } from '../src/extensions/devices/thingbot/extension/blocks'
-import { registerGenerators as registerThingbotGenerators } from '../src/extensions/devices/thingbot/extension/generator'
-import thingbotExtensionManifest from '../src/extensions/devices/thingbot/extension/manifest'
-import thingbotToolbox from '../src/extensions/devices/thingbot/extension/toolbox'
 import thingbotManifest from '../src/extensions/devices/thingbot/manifest'
 import { registerBlocks } from '../src/extensions/peripheral/servo/blocks'
 import { registerGenerators } from '../src/extensions/peripheral/servo/generator'
 import servoManifest from '../src/extensions/peripheral/servo/manifest'
 import servoToolbox from '../src/extensions/peripheral/servo/toolbox'
+import { registerBlocks as registerThingbotBlocks } from '../src/extensions/peripheral/thingbot-core/blocks'
+import { registerGenerators as registerThingbotGenerators } from '../src/extensions/peripheral/thingbot-core/generator'
+import thingbotCoreManifest from '../src/extensions/peripheral/thingbot-core/manifest'
+import thingbotToolbox from '../src/extensions/peripheral/thingbot-core/toolbox'
 import type { ArduinoGenerator, ArduinoOrder, Blockly } from '../src/shared/types'
 
 // Minimal stand-ins for the editor's injected instances: the order enum the pack reads and a generator
@@ -54,7 +54,7 @@ describe('servo blocks', () => {
   })
 })
 
-describe('thingbot device extension', () => {
+describe('thingbot-core peripheral', () => {
   it('defines thingbot_digitalwrite on the injected Blockly', () => {
     const Blocks: Record<string, unknown> = {}
     registerThingbotBlocks({ Blocks } as unknown as Blockly)
@@ -105,38 +105,35 @@ describe('manifests', () => {
     expect(thingbotManifest.kind).toBe('device')
     expect(thingbotManifest.id).toBe('thingbot')
     expect(thingbotManifest.fqbn).toBe('esp32:esp32:esp32c3')
-    expect(thingbotManifest.extensions).toEqual([
-      { kind: 'deviceExtension', path: './extension/manifest.js' },
-      { kind: 'peripheral', id: 'servo' },
-    ])
+    expect(thingbotManifest.extensions).toEqual(['thingbot-core', 'servo'])
     expect(thingbotManifest.compile?.options).toEqual({ CDCOnBoot: 'cdc' })
   })
 
   it('thingbot carries the device-card metadata the VM localizes and renders', () => {
     expect(thingbotManifest.description.id).toBe('device.thingbot.description')
     expect(thingbotManifest.description.default).toMatch(/ESP32-C3/)
-    expect(thingbotManifest.manufacturer).toBe('thingedu.com')
+    expect(thingbotManifest.manufacturer).toBe('ThingEdu')
     expect(thingbotManifest.requires).toBe('serial')
   })
 
-  it('thingbot peripheral refs resolve to a loaded peripheral pack', () => {
-    const peripheralIds = new Set([servoManifest.id])
-    const refs = (thingbotManifest.extensions ?? []).filter((ref) => ref.kind === 'peripheral')
+  it('thingbot extension refs resolve to loaded peripheral packs', () => {
+    const peripheralIds = new Set([thingbotCoreManifest.id, servoManifest.id])
+    const refs = thingbotManifest.extensions ?? []
     expect(refs.length).toBeGreaterThan(0)
-    for (const ref of refs) {
-      expect(peripheralIds).toContain(ref.id)
+    for (const id of refs) {
+      expect(peripheralIds).toContain(id)
     }
   })
 
-  it('thingbot hidden device extension points at its served modules', () => {
-    expect(thingbotExtensionManifest.kind).toBe('deviceExtension')
-    expect(thingbotExtensionManifest.id).toBe('thingbot.device')
-    expect(thingbotExtensionManifest.hidden).toBe(true)
-    expect(thingbotExtensionManifest.blocks).toBe('./blocks.js')
-    expect(thingbotExtensionManifest.generator).toBe('./generator.js')
+  it('thingbot-core is a hidden peripheral pointing at its served modules', () => {
+    expect(thingbotCoreManifest.kind).toBe('peripheral')
+    expect(thingbotCoreManifest.id).toBe('thingbot-core')
+    expect(thingbotCoreManifest.hidden).toBe(true)
+    expect(thingbotCoreManifest.blocks).toBe('./blocks.js')
+    expect(thingbotCoreManifest.generator).toBe('./generator.js')
   })
 
-  it('thingbot toolbox references the device-extension block type', () => {
+  it('thingbot toolbox references the device-exclusive block type', () => {
     expect(thingbotToolbox.contents).toContainEqual({ kind: 'block', type: 'thingbot_digitalwrite' })
   })
 })

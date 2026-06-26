@@ -2,7 +2,7 @@
  * ThingBot-exclusive Arduino codegen. The block is namespaced to this device extension so it does not
  * collide with the standard Arduino API blocks.
  */
-import type { RegisterGenerators } from '../../../../shared/types'
+import type { RegisterGenerators } from '../../../shared/types'
 
 export const registerGenerators: RegisterGenerators = (generator, Order) => {
   generator.forBlock.thingbot_digitalwrite = (block) => {

@@ -15,7 +15,7 @@ const MathUtil = require('./util/math-util');
 const Runtime = require('./engine/runtime');
 const StringUtil = require('./util/string-util');
 const formatMessage = require('format-message');
-const {DeviceRegistry, DeviceExtensionRegistry, PeripheralRegistry, ManifestDevice} = require('./devices');
+const {DeviceRegistry, PeripheralRegistry, ManifestDevice} = require('./devices');
 const {boards} = require('./extensions/devices');
 const LinkClient = require('./link/client/link-client');
 const CloudClient = require('./link/client/cloud-client');
@@ -200,13 +200,6 @@ class VirtualMachine extends EventEmitter {
         this._resourceDevicePacks = new Map();
 
         /**
-         * The selected device's hidden extension: which one is active, for the board-mode toolbox and
-         * compile-time lib resolution.
-         * @type {DeviceExtensionRegistry}
-         */
-        this.deviceExtensionRegistry = new DeviceExtensionRegistry();
-
-        /**
          * Source data for helper-served peripheral packs, keyed by id: `{manifest, base}`. Device
          * selection reads it to activate the peripherals the selected device references.
          * @type {Map<string, {manifest: object, base: string}>}
@@ -214,16 +207,16 @@ class VirtualMachine extends EventEmitter {
         this._resourcePeripheralPacks = new Map();
 
         /**
-         * The reusable component packs active for the selected device, for the board-mode toolbox and
-         * compile-time lib resolution.
+         * The peripheral packs active for the selected device — the device's own hidden pack plus any
+         * reusable components — for the board-mode toolbox and compile-time lib resolution.
          * @type {PeripheralRegistry}
          */
         this.peripheralRegistry = new PeripheralRegistry();
 
         /**
-         * The GUI-injected `@scratch/scratch-blocks` module, or null when headless. Registering a device
-         * extension's block definitions and Arduino codegen needs the shared singleton it holds; absent,
-         * device selection still tracks the active extension's toolbox/libs but skips block/codegen.
+         * The GUI-injected `@scratch/scratch-blocks` module, or null when headless. Registering an active
+         * peripheral's block definitions and Arduino codegen needs the shared singleton it holds; absent,
+         * device selection still tracks active peripherals' toolbox/libs but skips block/codegen.
          * @type {?object}
          */
         this._scratchBlocks = null;
@@ -1334,7 +1327,7 @@ class VirtualMachine extends EventEmitter {
      * Fetch the helper-served pack index and register each device pack against the device registry, so
      * helper-provided boards join the built-in list. One successful run per VM instance (guarded); a
      * missing or unreachable helper logs and returns, leaving built-in devices working and the next
-     * link-mode entry free to retry. Device-extension and peripheral packs are loaded in later phases.
+     * link-mode entry free to retry. Peripheral packs are recorded here and activated on device selection.
      * @returns {Promise<void>} resolves once packs are loaded (or skipped).
      */
     async loadResourcePacks () {
@@ -1387,8 +1380,8 @@ class VirtualMachine extends EventEmitter {
     }
 
     /**
-     * Inject the editor's `@scratch/scratch-blocks` module so device selection can register a hidden
-     * extension's blocks and Arduino codegen against the shared singleton. Called by the GUI; left null
+     * Inject the editor's `@scratch/scratch-blocks` module so device selection can register its active
+     * peripherals' blocks and Arduino codegen against the shared singleton. Called by the GUI; left null
      * in headless use, where block/codegen registration is skipped.
      * @param {object} scratchBlocks - the `@scratch/scratch-blocks` module handle.
      * @returns {void}
@@ -1410,43 +1403,20 @@ class VirtualMachine extends EventEmitter {
     }
 
     /**
-     * Activate the selected device's hidden extension(s): import and register their blocks and codegen,
-     * and mark the device's extension active for the toolbox and compile libs. Clears the previously
-     * active extension first; selecting a built-in board (no pack) or `null` just clears it. Idempotent
-     * per extension — a re-selected device re-activates without re-importing or re-registering.
+     * Activate the peripherals the selected device references — its own hidden pack plus any reusable
+     * components — by id, in `extensions` order (the board-mode palette order). Clears the previously
+     * active peripherals first; selecting a built-in board (no pack) or `null` just clears them.
+     * Idempotent per peripheral — a re-selected device re-activates without re-importing or re-registering.
      * @param {?string} deviceId - the selected device's id, or null when none is selected.
-     * @returns {Promise<void>} resolves once the device's extensions are active.
+     * @returns {Promise<void>} resolves once the device's peripherals are active.
      */
     async selectDevice (deviceId) {
-        this.deviceExtensionRegistry.clearActive();
         this.peripheralRegistry.clearActive();
         const pack = this._resourceDevicePacks.get(deviceId);
         if (!pack) return;
-        for (const ref of pack.manifest.extensions || []) {
-            if (ref.kind === 'deviceExtension') {
-                await this._activateDeviceExtension(ref, pack.base, deviceId);
-            } else if (ref.kind === 'peripheral') {
-                await this._activatePeripheral(ref.id);
-            }
+        for (const id of pack.manifest.extensions || []) {
+            await this._activatePeripheral(id);
         }
-    }
-
-    /**
-     * The active device extension's toolbox categories, for the board-mode palette. Empty when no
-     * device extension is active (no device selected, or a built-in board).
-     * @returns {Array.<object>} toolbox category descriptors.
-     */
-    getActiveDeviceToolboxCategories () {
-        return this.deviceExtensionRegistry.getActiveDeviceToolboxCategories();
-    }
-
-    /**
-     * The active device extension's vendored libs, for compile-time include resolution. Empty when no
-     * device extension is active.
-     * @returns {Array.<object>} lib refs.
-     */
-    getActiveDeviceLibs () {
-        return this.deviceExtensionRegistry.getActiveDeviceLibs();
     }
 
     /**
@@ -1468,51 +1438,11 @@ class VirtualMachine extends EventEmitter {
     }
 
     /**
-     * Import a device's hidden extension and register it. Imports its manifest, then (when a
-     * `scratch-blocks` handle is present) its blocks and generator, registering them against the shared
-     * singleton; records the active extension's toolbox and libs. A failure is logged and skipped so one
-     * bad extension does not break device selection.
-     * @param {{path: string}} ref - the `deviceExtension` ref from the device manifest.
-     * @param {string} deviceBase - the device pack's served base URL.
-     * @param {string} deviceId - the owning device's id.
-     * @returns {Promise<void>} resolves once the extension is active.
-     * @private
-     */
-    async _activateDeviceExtension (ref, deviceBase, deviceId) {
-        const manifestURL = `${deviceBase}/${ref.path.replace(/^\.\//, '')}`;
-        const extBase = manifestURL.replace(/\/[^/]+$/, '');
-        try {
-            const manifest = (await this._importPackModule(manifestURL)).default;
-            if (this.deviceExtensionRegistry.has(manifest.id)) {
-                this.deviceExtensionRegistry.setActive(manifest.id);
-                return;
-            }
-            const toolbox = (await this._importPackModule(
-                `${extBase}/${manifest.toolbox.replace(/^\.\//, '')}`
-            )).default;
-            const libs = manifest.libs || [];
-            if (this._scratchBlocks) {
-                const {registerBlocks} = await this._importPackModule(
-                    `${extBase}/${manifest.blocks.replace(/^\.\//, '')}`
-                );
-                const {registerGenerators} = await this._importPackModule(
-                    `${extBase}/${manifest.generator.replace(/^\.\//, '')}`
-                );
-                registerBlocks(this._scratchBlocks);
-                registerGenerators(this._scratchBlocks.arduinoGenerator, this._scratchBlocks.ArduinoOrder);
-            }
-            this.deviceExtensionRegistry.register({deviceId, id: manifest.id, toolbox, libs, base: extBase});
-            this.deviceExtensionRegistry.setActive(manifest.id);
-        } catch (e) {
-            log.warn(`selectDevice: failed to activate device extension ${manifestURL}`, e);
-        }
-    }
-
-    /**
-     * Activate a reusable peripheral the selected device references: import its toolbox and libs and,
-     * when a `scratch-blocks` handle is present and it ships blocks, register its blocks and codegen on
-     * the shared singleton. Idempotent — an already-activated peripheral is just re-marked active. A
-     * failure is logged and skipped so one bad peripheral does not break device selection.
+     * Activate a peripheral the selected device references (a hidden device-owned pack or a reusable
+     * component): import its toolbox and libs and, when a `scratch-blocks` handle is present and it ships
+     * blocks, register its blocks and codegen on the shared singleton. Idempotent — an already-activated
+     * peripheral is just re-marked active. A failure is logged and skipped so one bad peripheral does not
+     * break device selection.
      * @param {string} id - the referenced peripheral id.
      * @returns {Promise<void>} resolves once the peripheral is active.
      * @private

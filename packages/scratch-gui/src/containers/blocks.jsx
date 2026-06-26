@@ -459,11 +459,9 @@ class Blocks extends React.Component {
                 this.props.vm.runtime.getBlocksXML(target),
                 this.props.colorMode
             ).filter(category => boardMode || !BOARD_ONLY_CATEGORY_IDS.includes(category.id));
-            // Append the selected device extension's categories, then its referenced peripherals'
-            // (both empty in host mode, since the registries clear when no device is selected).
-            for (const category of this.props.vm.getActiveDeviceToolboxCategories()) {
-                dynamicBlocksXML.push(packCategoryToToolboxXML(category, 'device'));
-            }
+            // Append the selected device's active peripheral categories, in the device's `extensions`
+            // order (its own hidden pack first). Empty in host mode, since the registry clears when no
+            // device is selected.
             for (const category of this.props.vm.getActivePeripheralToolboxCategories()) {
                 dynamicBlocksXML.push(packCategoryToToolboxXML(category, 'peripheral'));
             }

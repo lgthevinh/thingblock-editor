@@ -1,7 +1,7 @@
 /**
  * Toolbox category shown while the ThingBot device is selected.
  */
-import type { ToolboxCategory } from '../../../../shared/types'
+import type { ToolboxCategory } from '../../../shared/types'
 
 const toolbox: ToolboxCategory = {
   kind: 'category',
