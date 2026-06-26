@@ -6,6 +6,7 @@ import {connect} from 'react-redux';
 import VM from '@scratch/scratch-vm';
 import AudioEngine from 'scratch-audio';
 
+import {setDevice} from '../reducers/board';
 import {setProjectUnchanged} from '../reducers/project-changed';
 import {
     LoadingStates,
@@ -40,6 +41,9 @@ const vmManagerHOC = function (WrappedComponent) {
                 // pull helper-served device packs — a no-op in cloud mode or when the helper is down.
                 this.props.vm.setModuleImporter(url => import(/* webpackIgnore: true */ url));
                 this.props.vm.loadResourcePacks();
+                // A loaded project carries its target board; mirror it into the board selection so the
+                // editor enters (or leaves) board mode to match. A null device clears the selection.
+                this.props.vm.on('BOARD_RESTORED', ({device}) => this.props.onSetDevice(device));
             }
             if (!this.props.isPlayerOnly && !this.props.isStarted) {
                 this.props.vm.start();
@@ -91,6 +95,7 @@ const vmManagerHOC = function (WrappedComponent) {
                 isStarted,
                 onError: onErrorProp,
                 onLoadedProject: onLoadedProjectProp,
+                onSetDevice,
                 onSetProjectUnchanged,
                 projectData,
                  
@@ -121,6 +126,7 @@ const vmManagerHOC = function (WrappedComponent) {
         messages: PropTypes.objectOf(PropTypes.string),
         onError: PropTypes.func,
         onLoadedProject: PropTypes.func,
+        onSetDevice: PropTypes.func,
         onSetProjectUnchanged: PropTypes.func,
         projectData: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
         projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -148,6 +154,7 @@ const vmManagerHOC = function (WrappedComponent) {
         onError: error => dispatch(projectError(error)),
         onLoadedProject: (loadingState, canSave) =>
             dispatch(onLoadedProject(loadingState, canSave, true)),
+        onSetDevice: deviceId => dispatch(setDevice(deviceId)),
         onSetProjectUnchanged: () => dispatch(setProjectUnchanged())
     });
 

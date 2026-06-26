@@ -28,6 +28,7 @@ import DragLayer from '../../containers/drag-layer.jsx';
 import ConnectionModal from '../../containers/connection-modal.jsx';
 import TelemetryModal from '../telemetry-modal/telemetry-modal.jsx';
 import BoardLibrary from '../../containers/board-library.jsx';
+import PeripheralLibrary from '../../containers/peripheral-library.jsx';
 
 import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
 import {resolveStageSize} from '../../lib/screen-utils';
@@ -136,6 +137,7 @@ const GUIComponent = props => {
         onActivateTab,
         onClickLogo,
         onExtensionButtonClick,
+        onOpenPeripheralLibrary,
         onProjectTelemetryEvent,
         onRequestCloseDebugModal,
         onRequestCloseSettingsModal,
@@ -302,6 +304,7 @@ const GUIComponent = props => {
                         />
                     ) : null}
                     <BoardLibrary />
+                    <PeripheralLibrary />
                     {cardsVisible ? (
                         <Cards />
                     ) : null}
@@ -440,8 +443,11 @@ const GUIComponent = props => {
                                         />
                                     </Box>
                                     <ExtensionsButton
+                                        boardMode={Boolean(selectedDeviceId)}
                                         intl={intl}
-                                        onExtensionButtonClick={onExtensionButtonClick}
+                                        onExtensionButtonClick={
+                                            selectedDeviceId ? onOpenPeripheralLibrary : onExtensionButtonClick
+                                        }
                                     />
                                     <Box className={styles.watermark}>
                                         <Watermark />
@@ -527,6 +533,7 @@ GUIComponent.propTypes = {
     onActivateTab: PropTypes.func,
     onClickLogo: PropTypes.func,
     onExtensionButtonClick: PropTypes.func,
+    onOpenPeripheralLibrary: PropTypes.func,
     onLogOut: PropTypes.func,
     onClickLogin: PropTypes.func,
     onOpenRegistration: PropTypes.func,

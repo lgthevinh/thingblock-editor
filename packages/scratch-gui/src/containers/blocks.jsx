@@ -78,6 +78,7 @@ class Blocks extends React.Component {
             'handleMonitorsUpdate',
             'handleExtensionAdded',
             'handleBlocksInfoUpdate',
+            'handlePeripheralsChanged',
             'onTargetsUpdate',
             'onVisualReport',
             'onWorkspaceUpdate',
@@ -364,6 +365,7 @@ class Blocks extends React.Component {
         this.props.vm.addListener('BLOCKSINFO_UPDATE', this.handleBlocksInfoUpdate);
         this.props.vm.addListener('PERIPHERAL_CONNECTED', this.handleStatusButtonUpdate);
         this.props.vm.addListener('PERIPHERAL_DISCONNECTED', this.handleStatusButtonUpdate);
+        this.props.vm.addListener('PERIPHERALS_CHANGED', this.handlePeripheralsChanged);
     }
     detachVM () {
         this.props.vm.removeListener('SCRIPT_GLOW_ON', this.onScriptGlowOn);
@@ -378,6 +380,7 @@ class Blocks extends React.Component {
         this.props.vm.removeListener('BLOCKSINFO_UPDATE', this.handleBlocksInfoUpdate);
         this.props.vm.removeListener('PERIPHERAL_CONNECTED', this.handleStatusButtonUpdate);
         this.props.vm.removeListener('PERIPHERAL_DISCONNECTED', this.handleStatusButtonUpdate);
+        this.props.vm.removeListener('PERIPHERALS_CHANGED', this.handlePeripheralsChanged);
     }
 
     updateToolboxBlockValue (id, value) {
@@ -483,6 +486,15 @@ class Blocks extends React.Component {
             // Selecting a board enables the code view; deselecting clears it.
             this.updateGeneratedCode();
         });
+    }
+    handlePeripheralsChanged () {
+        // The user added or removed a peripheral (or a loaded project restored one); the VM already
+        // updated the active set, so just rebuild the palette and regenerate code to match.
+        const toolboxXML = this.getToolboxXML();
+        if (toolboxXML) {
+            this.props.updateToolboxState(toolboxXML);
+        }
+        this.updateGeneratedCode();
     }
     onWorkspaceUpdate (data) {
         // When we change sprites, update the toolbox to have the new sprite's blocks

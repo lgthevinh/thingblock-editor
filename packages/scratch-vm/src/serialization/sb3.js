@@ -658,6 +658,16 @@ const serialize = function (runtime, targetId) {
     // Assemble extension list
     obj.extensions = Array.from(extensions);
 
+    // Persist the selected firmware board and its user-added peripherals so the project reopens against
+    // the same hardware. Device-provided peripherals are re-derived from the device manifest on load, so
+    // only the user-added ids are stored. Absent in host mode (no board selected).
+    if (runtime.board && runtime.board.device) {
+        obj.board = {
+            device: runtime.board.device,
+            peripherals: runtime.board.peripherals || []
+        };
+    }
+
     // Assemble metadata
     const meta = Object.create(null);
     meta.semver = '3.0.0';
@@ -1503,7 +1513,8 @@ const deserialize = function (json, runtime, zip, isSingleSprite) {
         })
         .then(targets => ({
             targets,
-            extensions
+            extensions,
+            board: json.board || null
         }));
 };
 

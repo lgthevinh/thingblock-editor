@@ -14,11 +14,17 @@ const messages = defineMessages({
         id: 'gui.gui.addExtension',
         description: 'Button to add an extension in the target pane',
         defaultMessage: 'Add Extension'
+    },
+    addPeripheral: {
+        id: 'gui.gui.addPeripheral',
+        description: 'Button to add a hardware peripheral when a board is selected',
+        defaultMessage: 'Add Peripheral'
     }
 });
 
 const ExtensionButton = props => {
     const {
+        boardMode,
         intl,
         onExtensionButtonClick
     } = props;
@@ -29,13 +35,16 @@ const ExtensionButton = props => {
         onExtensionButtonClick?.();
     }, [captureFocus, onExtensionButtonClick]);
 
+    // In board mode the button opens the peripheral library instead of the extension library.
+    const label = intl.formatMessage(boardMode ? messages.addPeripheral : messages.addExtension);
+
     return (
         <Box className={styles.extensionButtonContainer}>
             <button
                 className={classNames(styles.extensionButton)}
-                title={intl.formatMessage(messages.addExtension)}
+                title={label}
                 onClick={handleExtensionButtonClick}
-                aria-label={intl.formatMessage(messages.addExtension)}
+                aria-label={label}
             >
                 <img
                     className={styles.extensionButtonIcon}
@@ -48,6 +57,7 @@ const ExtensionButton = props => {
 };
 
 ExtensionButton.propTypes = {
+    boardMode: PropTypes.bool,
     intl: intlShape.isRequired,
     onExtensionButtonClick: PropTypes.func
 };

@@ -44,6 +44,30 @@ const servoManifest = {
 };
 const servoToolbox = {kind: 'category', name: 'Servo', contents: [{kind: 'block', type: 'servo_setangle'}]};
 
+// A reusable peripheral the device does NOT reference — only reachable by the user adding it.
+const buzzerBase = 'http://localhost:3030/resources/extensions/peripheral/buzzer';
+const buzzerManifest = {
+    id: 'buzzer',
+    kind: 'peripheral',
+    name: 'Buzzer',
+    blocks: './blocks.js',
+    generator: './generator.js',
+    toolbox: './toolbox.js',
+    libs: [{path: 'libs/Buzzer'}]
+};
+const buzzerToolbox = {kind: 'category', name: 'Buzzer', contents: [{kind: 'block', type: 'buzzer_tone'}]};
+
+// A peripheral that carries library-card metadata (icon + localized description), to check the list
+// surfaces it. It is never activated, so it needs no served modules.
+const lcdBase = 'http://localhost:3030/resources/extensions/peripheral/lcd';
+const lcdManifest = {
+    id: 'lcd',
+    kind: 'peripheral',
+    name: 'LCD',
+    icon: './icon.svg',
+    description: {id: 'peripheral.lcd.description', default: 'A 16x2 character display.'}
+};
+
 // A VM whose pack imports are served from in-memory modules; `counts` records imports per URL so a
 // re-selection can be shown to skip re-importing the registered modules. ThingBot references both the
 // hidden core pack and the servo peripheral, so one device selection reaches both.
@@ -64,6 +88,13 @@ const makeVM = () => {
         }},
         [`${servoBase}/generator.js`]: {registerGenerators: (generator, Order) => {
             generator.forBlock.servo_setangle = () => `servo.write(90);${Order.ATOMIC}`;
+        }},
+        [`${buzzerBase}/toolbox.js`]: {default: buzzerToolbox},
+        [`${buzzerBase}/blocks.js`]: {registerBlocks: Blockly => {
+            Blockly.Blocks.buzzer_tone = {};
+        }},
+        [`${buzzerBase}/generator.js`]: {registerGenerators: (generator, Order) => {
+            generator.forBlock.buzzer_tone = () => `tone(8, 440);${Order.ATOMIC}`;
         }}
     };
     vm._importPackModule = url => {
@@ -74,6 +105,8 @@ const makeVM = () => {
     vm.registerDeviceManifest(deviceManifest, deviceBase);
     vm.registerPeripheralManifest(coreManifest, coreBase);
     vm.registerPeripheralManifest(servoManifest, servoBase);
+    vm.registerPeripheralManifest(buzzerManifest, buzzerBase);
+    vm.registerPeripheralManifest(lcdManifest, lcdBase);
     return {vm, counts};
 };
 
@@ -186,14 +219,129 @@ test('a device referencing an unknown peripheral skips it without throwing', asy
     const {vm} = makeVM();
     vm.setScratchBlocks(makeScratchBlocks());
     vm.registerDeviceManifest(
-        {id: 'ghost', kind: 'device', name: 'Ghost', fqbn: 'x:y:z', icon: './icon.svg',
-            description: {id: 'd', default: 'd'}, manufacturer: 'x', requires: 'serial',
-            extensions: ['does-not-exist', 'servo']},
+        {
+            id: 'ghost',
+            kind: 'device',
+            name: 'Ghost',
+            fqbn: 'x:y:z',
+            icon: './icon.svg',
+            description: {id: 'd', default: 'd'},
+            manufacturer: 'x',
+            requires: 'serial',
+            extensions: ['does-not-exist', 'servo']
+        },
         deviceBase
     );
 
     await t.resolves(vm.selectDevice('ghost'), 'unknown peripheral does not break selection');
     t.same(vm.getActivePeripheralToolboxCategories(), [servoToolbox], 'the known peripheral still activates');
+
+    t.end();
+});
+
+test('getPeripheralList lists non-hidden packs with active/locked flags', async t => {
+    const {vm} = makeVM();
+    vm.setScratchBlocks(makeScratchBlocks());
+
+    await vm.selectDevice('thingbot');
+    const list = vm.getPeripheralList();
+    const byId = Object.fromEntries(list.map(p => [p.id, p]));
+
+    t.notOk(byId['thingbot-core'], 'the hidden device-owned pack is excluded from the library');
+    t.same(byId.servo, {id: 'servo', name: 'Servo', active: true, locked: true},
+        'a device-provided peripheral is active and locked');
+    t.same(byId.buzzer, {id: 'buzzer', name: 'Buzzer', active: false, locked: false},
+        'an unreferenced peripheral is neither active nor locked');
+
+    t.end();
+});
+
+test('getPeripheralList surfaces icon and description when the manifest provides them', async t => {
+    const {vm} = makeVM();
+    const lcd = vm.getPeripheralList().find(p => p.id === 'lcd');
+
+    t.equal(lcd.iconURL, `${lcdBase}/icon.svg`, 'the icon resolves against the pack base');
+    t.equal(lcd.description, 'A 16x2 character display.', 'the localized description resolves to its default');
+
+    const buzzer = vm.getPeripheralList().find(p => p.id === 'buzzer');
+    t.notOk('iconURL' in buzzer, 'a pack without an icon has no iconURL');
+    t.notOk('description' in buzzer, 'a pack without a description has no description');
+
+    t.end();
+});
+
+test('addPeripheral activates a user-chosen peripheral and emits PERIPHERALS_CHANGED', async t => {
+    const {vm} = makeVM();
+    const scratchBlocks = makeScratchBlocks();
+    vm.setScratchBlocks(scratchBlocks);
+    let changed = 0;
+    vm.on('PERIPHERALS_CHANGED', () => changed++);
+
+    await vm.selectDevice('thingbot');
+    await vm.addPeripheral('buzzer');
+
+    t.ok(scratchBlocks.Blocks.buzzer_tone, 'the added peripheral\'s blocks register on the shared Blockly');
+    t.same(
+        vm.getActivePeripheralToolboxCategories(),
+        [coreToolbox, servoToolbox, buzzerToolbox],
+        'the added category appends after the device-provided ones'
+    );
+    t.same(vm.getProjectPeripheralIds(), ['buzzer'], 'the user-added id is recorded for the project');
+    t.equal(changed, 1, 'PERIPHERALS_CHANGED fired once');
+
+    t.end();
+});
+
+test('removePeripheral deactivates a user-added peripheral and emits', async t => {
+    const {vm} = makeVM();
+    vm.setScratchBlocks(makeScratchBlocks());
+    let changed = 0;
+    vm.on('PERIPHERALS_CHANGED', () => changed++);
+
+    await vm.selectDevice('thingbot');
+    await vm.addPeripheral('buzzer');
+    vm.removePeripheral('buzzer');
+
+    t.same(vm.getActivePeripheralToolboxCategories(), [coreToolbox, servoToolbox], 'the category is gone');
+    t.same(vm.getProjectPeripheralIds(), [], 'the user-added id is cleared');
+    t.equal(changed, 2, 'PERIPHERALS_CHANGED fired for the add and the remove');
+
+    t.end();
+});
+
+test('a device-provided peripheral cannot be added or removed by the user', async t => {
+    const {vm} = makeVM();
+    vm.setScratchBlocks(makeScratchBlocks());
+
+    await vm.selectDevice('thingbot');
+    await vm.addPeripheral('servo');
+    t.same(vm.getProjectPeripheralIds(), [], 'adding a device-provided peripheral is a no-op');
+
+    vm.removePeripheral('servo');
+    t.same(
+        vm.getActivePeripheralToolboxCategories(),
+        [coreToolbox, servoToolbox],
+        'servo stays active after a remove attempt'
+    );
+
+    t.end();
+});
+
+test('user-added peripherals re-activate across device re-selection without re-importing', async t => {
+    const {vm, counts} = makeVM();
+    vm.setScratchBlocks(makeScratchBlocks());
+
+    await vm.selectDevice('thingbot');
+    await vm.addPeripheral('buzzer');
+    await vm.selectDevice(null);
+    await vm.selectDevice('thingbot');
+
+    t.same(
+        vm.getActivePeripheralToolboxCategories(),
+        [coreToolbox, servoToolbox, buzzerToolbox],
+        'the user-added peripheral comes back on re-selection'
+    );
+    t.equal(counts[`${buzzerBase}/blocks.js`], 1, 'buzzer blocks imported once across re-selection');
 
     t.end();
 });

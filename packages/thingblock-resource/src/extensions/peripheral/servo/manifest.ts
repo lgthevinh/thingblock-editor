@@ -9,6 +9,12 @@ const manifest: PeripheralManifest = {
   id: 'servo',
   kind: 'peripheral',
   name: 'Servo',
+  icon: './icon.svg',
+  description: {
+    id: 'peripheral.servo.description',
+    default: 'A hobby servo motor you drive to a target angle.',
+    description: 'Description of the Servo peripheral',
+  },
   blocks: './blocks.js',
   generator: './generator.js',
   toolbox: './toolbox.js',

@@ -97,6 +97,13 @@ describe('manifests', () => {
     expect(servoManifest.libs).toEqual([{ path: 'libs/Servo' }])
   })
 
+  it('servo carries the library-card icon and localized description', () => {
+    expect(servoManifest.icon).toBe('./icon.svg')
+    expect(servoManifest.description?.id).toBe('peripheral.servo.description')
+    expect(servoManifest.description?.default).toMatch(/servo/i)
+    expect(servoManifest.hidden).toBeUndefined()
+  })
+
   it('servo toolbox references the block type', () => {
     expect(servoToolbox.contents).toContainEqual({ kind: 'block', type: 'servo_setangle' })
   })

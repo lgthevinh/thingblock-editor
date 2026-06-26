@@ -696,6 +696,24 @@ class Runtime extends EventEmitter {
     }
 
     /**
+     * Event name for reporting that the selected device's active peripheral set changed (a peripheral was
+     * added or removed), so the palette and generated code should rebuild.
+     * @constant {string}
+     */
+    static get PERIPHERALS_CHANGED () {
+        return 'PERIPHERALS_CHANGED';
+    }
+
+    /**
+     * Event name for reporting that a loaded project's saved board (device + user peripherals) has been
+     * restored, so the editor can sync its board selection UI to match the project.
+     * @constant {string}
+     */
+    static get BOARD_RESTORED () {
+        return 'BOARD_RESTORED';
+    }
+
+    /**
      * Event name to indicate that the microphone is being used to stream audio.
      * @constant {string}
      */

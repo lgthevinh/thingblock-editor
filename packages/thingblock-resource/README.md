@@ -71,8 +71,9 @@ THINGBLOCK_RESOURCE_ROOT=<helper-resource-dir> \
    reusable peripherals — by listing their ids in `extensions: ['<id>', …]` (the device's own pack
    first, since order is the palette order).
 3. For a peripheral, add only the surfaces it needs: `blocks.ts`, `generator.ts`, and `toolbox.ts` are
-   optional; vendored `libs/` sources can exist without a toolbox. Set `hidden: true` for a pack that
-   should be reachable only through a device reference.
+   optional; vendored `libs/` sources can exist without a toolbox. A non-hidden peripheral may add an
+   `icon` (`./icon.svg`) and a localized `description` for its library card. Set `hidden: true` for a
+   pack that should be reachable only through a device reference (it never appears in the library).
 4. The build discovers it automatically (no entry list to maintain).
 
 > Two libs categories: published Arduino libraries go in `registryLibs` (the helper installs them via

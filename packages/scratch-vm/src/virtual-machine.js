@@ -214,6 +214,28 @@ class VirtualMachine extends EventEmitter {
         this.peripheralRegistry = new PeripheralRegistry();
 
         /**
+         * The selected device's id, or null in host mode. Tracked so the project can persist which board
+         * (and thus which peripherals) it targets.
+         * @type {?string}
+         */
+        this._selectedDeviceId = null;
+
+        /**
+         * Peripheral ids the user added from the library, beyond the ones the selected device provides
+         * automatically. Project-level (persisted with the project) and re-activated on each device
+         * selection; kept disjoint from the device's own peripherals, which are never user-removable.
+         * @type {Set<string>}
+         */
+        this._projectPeripheralIds = new Set();
+
+        /**
+         * A loaded project's saved board, held when its device's helper pack has not registered yet, to be
+         * applied once resource packs finish loading. Null when there is nothing pending.
+         * @type {?{device: string, peripherals: Array.<string>}}
+         */
+        this._pendingBoard = null;
+
+        /**
          * The GUI-injected `@scratch/scratch-blocks` module, or null when headless. Registering an active
          * peripheral's block definitions and Arduino codegen needs the shared singleton it holds; absent,
          * device selection still tracks active peripherals' toolbox/libs but skips block/codegen.
@@ -598,13 +620,18 @@ class VirtualMachine extends EventEmitter {
             return Promise.reject('Unable to verify Scratch Project version.');
         };
         return deserializePromise()
-            .then(({targets, extensions}) => {
+            .then(({targets, extensions, board}) => {
                 if (typeof performance !== 'undefined') {
                     performance.mark('scratch-vm-deserialize-end');
                     performance.measure('scratch-vm-deserialize',
                         'scratch-vm-deserialize-start', 'scratch-vm-deserialize-end');
                 }
-                return this.installTargets(targets, extensions, true);
+                return this.installTargets(targets, extensions, true)
+                    .then(async installed => {
+                        // Restore the project's saved board (sb3 only; sb2 has none) once targets are in.
+                        await this._applyBoard(board || null);
+                        return installed;
+                    });
             });
     }
 
@@ -1361,6 +1388,9 @@ class VirtualMachine extends EventEmitter {
 
         this._resourcePacksLoaded = true;
         this.emit(Runtime.RESOURCE_PACKS_LOADED);
+
+        // A project loaded before its device's pack was available left its board pending; apply it now.
+        if (this._pendingBoard) await this._applyBoard(this._pendingBoard);
     }
 
     /**
@@ -1403,20 +1433,153 @@ class VirtualMachine extends EventEmitter {
     }
 
     /**
-     * Activate the peripherals the selected device references — its own hidden pack plus any reusable
-     * components — by id, in `extensions` order (the board-mode palette order). Clears the previously
-     * active peripherals first; selecting a built-in board (no pack) or `null` just clears them.
-     * Idempotent per peripheral — a re-selected device re-activates without re-importing or re-registering.
+     * Select a device and activate its peripherals: first the ones the device provides automatically (its
+     * own hidden pack plus any reusable components it references, in `extensions` order), then the
+     * user-added project peripherals on top. Clears the previously active peripherals first; selecting a
+     * built-in board (no pack) or `null` just clears them. Idempotent per peripheral — a re-selected
+     * device re-activates without re-importing or re-registering.
      * @param {?string} deviceId - the selected device's id, or null when none is selected.
      * @returns {Promise<void>} resolves once the device's peripherals are active.
      */
     async selectDevice (deviceId) {
+        this._selectedDeviceId = deviceId || null;
         this.peripheralRegistry.clearActive();
         const pack = this._resourceDevicePacks.get(deviceId);
-        if (!pack) return;
-        for (const id of pack.manifest.extensions || []) {
-            await this._activatePeripheral(id);
+        if (pack) {
+            for (const id of pack.manifest.extensions || []) {
+                await this._activatePeripheral(id);
+            }
+            for (const id of this._projectPeripheralIds) {
+                await this._activatePeripheral(id);
+            }
         }
+        this._syncRuntimeBoard();
+    }
+
+    /**
+     * The peripheral ids the selected device provides automatically (its `extensions`), or empty for a
+     * built-in board with no pack. These are always active while the device is selected and cannot be
+     * removed from the library.
+     * @returns {Array.<string>} the device's own peripheral ids.
+     * @private
+     */
+    _deviceAutoPeripheralIds () {
+        const pack = this._resourceDevicePacks.get(this._selectedDeviceId);
+        return pack ? (pack.manifest.extensions || []) : [];
+    }
+
+    /**
+     * Add a user-chosen peripheral to the project and activate it. No-op when the peripheral is already
+     * active — whether the device provides it automatically or the user already added it. Emits
+     * `PERIPHERALS_CHANGED` so the palette and generated code rebuild.
+     * @param {string} id - the peripheral id to add.
+     * @returns {Promise<void>} resolves once the peripheral is active.
+     */
+    async addPeripheral (id) {
+        if (this._deviceAutoPeripheralIds().includes(id)) return;
+        if (this._projectPeripheralIds.has(id)) return;
+        this._projectPeripheralIds.add(id);
+        await this._activatePeripheral(id);
+        this._syncRuntimeBoard();
+        this.emit(Runtime.PERIPHERALS_CHANGED);
+    }
+
+    /**
+     * Remove a user-added peripheral from the project and deactivate it. Refuses to remove a peripheral
+     * the selected device provides automatically (it is not the user's to remove). Emits
+     * `PERIPHERALS_CHANGED` when something changed.
+     * @param {string} id - the peripheral id to remove.
+     * @returns {void}
+     */
+    removePeripheral (id) {
+        if (this._deviceAutoPeripheralIds().includes(id)) {
+            log.warn(`removePeripheral: "${id}" is provided by the selected device and cannot be removed`);
+            return;
+        }
+        if (!this._projectPeripheralIds.delete(id)) return;
+        this.peripheralRegistry.setInactive(id);
+        this._syncRuntimeBoard();
+        this.emit(Runtime.PERIPHERALS_CHANGED);
+    }
+
+    /**
+     * The user-added peripheral ids, beyond what the device provides automatically — the set the project
+     * persists.
+     * @returns {Array.<string>} the user-added peripheral ids.
+     */
+    getProjectPeripheralIds () {
+        return Array.from(this._projectPeripheralIds);
+    }
+
+    /**
+     * The non-hidden peripheral packs the library lists, each tagged with its current state: `active`
+     * (in the palette now) and `locked` (provided by the selected device, so not user-removable). Hidden
+     * packs — a device's own programming surface — never appear. A pack's `iconURL` and localized
+     * `description` are included only when its manifest provides them.
+     * @returns {Array.<{id: string, name: string, active: boolean, locked: boolean,
+     *   description?: string, iconURL?: string}>} library entries.
+     */
+    getPeripheralList () {
+        const auto = this._deviceAutoPeripheralIds();
+        const list = [];
+        for (const {manifest, base} of this._resourcePeripheralPacks.values()) {
+            if (manifest.hidden) continue;
+            const locked = auto.includes(manifest.id);
+            const entry = {
+                id: manifest.id,
+                name: manifest.name,
+                active: locked || this._projectPeripheralIds.has(manifest.id),
+                locked
+            };
+            if (manifest.description) entry.description = formatMessage(manifest.description);
+            if (manifest.icon) entry.iconURL = `${base}/${manifest.icon.replace(/^\.\//, '')}`;
+            list.push(entry);
+        }
+        return list;
+    }
+
+    /**
+     * Mirror the current board selection onto the runtime so the serializer (which only receives the
+     * runtime) can persist it. Null in host mode, so host-mode projects carry no board field.
+     * @returns {void}
+     * @private
+     */
+    _syncRuntimeBoard () {
+        this.runtime.board = this._selectedDeviceId ?
+            {device: this._selectedDeviceId, peripherals: this.getProjectPeripheralIds()} :
+            null;
+    }
+
+    /**
+     * Apply a project's saved board after load: reset to a clean board state, then — once the device is
+     * registered (helper packs may still be loading) — restore the user peripherals and select the device.
+     * Always emits `BOARD_RESTORED` with the resolved board (a null device for a host-mode project) so the
+     * editor syncs its board selection, clearing it when the loaded project has no board. When the device
+     * is not yet known, the board is held in `_pendingBoard` and retried (and emitted) once resource packs
+     * finish loading.
+     * @param {?{device: string, peripherals: Array.<string>}} board - the saved board, or null in host mode.
+     * @returns {Promise<void>} resolves once the board is applied or deferred.
+     * @private
+     */
+    async _applyBoard (board) {
+        this._selectedDeviceId = null;
+        this._projectPeripheralIds = new Set();
+        this.peripheralRegistry.clearActive();
+        this._pendingBoard = null;
+        this._syncRuntimeBoard();
+
+        if (board && board.device && !this.deviceRegistry.get(board.device)) {
+            this._pendingBoard = board;
+            return;
+        }
+        if (board && board.device) {
+            this._projectPeripheralIds = new Set(board.peripherals || []);
+            await this.selectDevice(board.device);
+        }
+        this.emit(Runtime.BOARD_RESTORED, {
+            device: this._selectedDeviceId,
+            peripherals: this.getProjectPeripheralIds()
+        });
     }
 
     /**

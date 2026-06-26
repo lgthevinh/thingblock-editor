@@ -42,6 +42,17 @@ class PeripheralRegistry {
     }
 
     /**
+     * Drop one peripheral from the active set (e.g. when the user removes it from the library). The
+     * peripheral's block definitions stay registered on the shared Blockly singleton — only its toolbox
+     * category and libs leave the active set, which is the visible and compile-relevant effect.
+     * @param {string} id - the peripheral id to deactivate.
+     * @returns {void}
+     */
+    setInactive (id) {
+        this._activeIds.delete(id);
+    }
+
+    /**
      * Clear the active set (e.g. when the device changes).
      * @returns {void}
      */

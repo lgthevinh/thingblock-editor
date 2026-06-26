@@ -20,6 +20,7 @@ import {
 import {
     closeTelemetryModal,
     openExtensionLibrary,
+    openPeripheralLibrary,
     closeDebugModal,
     closeSettingsModal
 } from '../reducers/modals';
@@ -213,6 +214,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => ({
     onExtensionButtonClick: () => dispatch(openExtensionLibrary()),
+    onOpenPeripheralLibrary: () => dispatch(openPeripheralLibrary()),
     onActivateTab: tab => dispatch(activateTab(tab)),
     onUpdateDynamicAssets: dynamicAssets => dispatch(setDynamicAssets(dynamicAssets)),
     setPlatform: platform => dispatch(setPlatform(platform)),

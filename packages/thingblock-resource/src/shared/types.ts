@@ -60,11 +60,15 @@ interface BaseManifest {
 export interface PeripheralManifest extends BaseManifest {
   kind: 'peripheral'
   /**
-   * Hidden from the (future) peripheral library: the pack is reachable only when a device references it
-   * by id. A device-exclusive programming surface is published as a hidden peripheral. Reusable
-   * components ("add a servo") omit this flag.
+   * Hidden from the peripheral library: the pack is reachable only when a device references it by id. A
+   * device-exclusive programming surface is published as a hidden peripheral. Reusable components ("add a
+   * servo") omit this flag.
    */
   hidden?: boolean
+  /** Relative path to the library-card icon. Optional; the card falls back to a blank thumbnail. */
+  icon?: string
+  /** Localized blurb for the library card; the VM resolves it via `format-message`. Optional. */
+  description?: LocalizedMessage
   /** Relative path to the `registerBlocks` module, when the peripheral exposes palette blocks. */
   blocks?: string
   /** Relative path to the `registerGenerators` module, when the peripheral exposes block codegen. */
