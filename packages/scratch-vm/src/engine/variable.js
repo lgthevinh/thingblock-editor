@@ -11,16 +11,14 @@ class Variable {
      * @param {string} id Id of the variable.
      * @param {string} name Name of the variable.
      * @param {string} type Type of the variable, one of '' or 'list'
-     * @param {boolean} isCloud Whether the variable is stored in the cloud.
      * @param {string} [dataType] Explicit value type for code generation, one of 'int', 'float', or 'string'.
      * Empty when the type should be inferred from the variable's assignments.
      * @class
      */
-    constructor (id, name, type, isCloud, dataType) {
+    constructor (id, name, type, dataType) {
         this.id = id || uid();
         this.name = name;
         this.type = type;
-        this.isCloud = isCloud;
         this.dataType = Variable.normalizeDataType(dataType);
         switch (this.type) {
         case Variable.SCALAR_TYPE:
@@ -40,7 +38,7 @@ class Variable {
     toXML (isLocal) {
         isLocal = (isLocal === true);
         return `<variable type="${this.type}" id="${this.id}" islocal="${isLocal
-        }" iscloud="${this.isCloud}">${xmlEscape(this.name)}</variable>`;
+        }">${xmlEscape(this.name)}</variable>`;
     }
 
     /**

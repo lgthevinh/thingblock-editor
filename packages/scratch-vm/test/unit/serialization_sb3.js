@@ -623,7 +623,7 @@ test('serializing and deserializing sb3 preserves explicit variable dataType', t
     return vm.loadProject(readFileToBuffer(exampleProjectPath))
         .then(() => {
             const stage = vm.runtime.targets[0];
-            stage.createVariable('typedVarId', 'temperature', '', false, 'float');
+            stage.createVariable('typedVarId', 'temperature', '', 'float');
 
             const serialized = sb3.serialize(vm.runtime);
             t.equal(serialized.targets[0].variableTypes.typedVarId, 'float');
@@ -641,7 +641,7 @@ test('deserializing sb3 rejects an unrecognized variable dataType', t => {
     return vm.loadProject(readFileToBuffer(exampleProjectPath))
         .then(() => {
             const stage = vm.runtime.targets[0];
-            stage.createVariable('typedVarId', 'temperature', '', false, 'float');
+            stage.createVariable('typedVarId', 'temperature', '', 'float');
 
             const serialized = JSON.parse(JSON.stringify(sb3.serialize(vm.runtime)));
             // Simulate a corrupt/hand-edited project carrying an arbitrary type string.

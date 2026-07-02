@@ -4,7 +4,6 @@ const Sprite = require('../../src/sprites/sprite');
 const Variable = require('../../src/engine/variable');
 const adapter = require('../../src/engine/adapter');
 const events = require('../fixtures/events.json');
-const Renderer = require('../fixtures/fake-renderer');
 const Runtime = require('../../src/engine/runtime');
 const RenderedTarget = require('../../src/sprites/rendered-target');
 
@@ -435,36 +434,6 @@ test('setVariableValue', t => {
     // Returns true and updates the value if variable is present
     t.equal(vm.setVariableValue(target.id, 'a-variable', 100), true);
     t.equal(target.lookupVariableById('a-variable').value, 100);
-
-    t.end();
-});
-
-test('setVariableValue requests update for cloud variable', t => {
-    const vm = new VirtualMachine();
-    const spr = new Sprite(null, vm.runtime);
-    const target = spr.createClone();
-    target.isStage = true;
-    target.createVariable('a-variable', 'a-name', Variable.SCALAR_TYPE, true /* isCloud */);
-
-    vm.runtime.targets = [target];
-
-    // Mock cloud io device requestUpdateVariable function
-    let requestUpdateVarWasCalled = false;
-    let varName;
-    let varValue;
-    vm.runtime.ioDevices.cloud.requestUpdateVariable = (name, value) => {
-        requestUpdateVarWasCalled = true;
-        varName = name;
-        varValue = value;
-    };
-
-    vm.setVariableValue(target.id, 'not-a-variable', 100);
-    t.equal(requestUpdateVarWasCalled, false);
-
-    vm.setVariableValue(target.id, 'a-variable', 100);
-    t.equal(requestUpdateVarWasCalled, true);
-    t.equal(varName, 'a-name');
-    t.equal(varValue, 100);
 
     t.end();
 });
@@ -1003,14 +972,6 @@ test('Setting turbo mode emits events', t => {
     vm.setTurboMode(false);
     t.equal(turboMode, false);
 
-    t.end();
-});
-
-test('Getting the renderer returns the renderer', t => {
-    const renderer = new Renderer();
-    const vm = new VirtualMachine();
-    vm.attachRenderer(renderer);
-    t.equal(vm.renderer, renderer);
     t.end();
 });
 

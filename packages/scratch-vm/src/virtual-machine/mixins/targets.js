@@ -13,10 +13,6 @@ module.exports = class TargetsMixin {
             if (variable) {
                 variable.value = value;
 
-                if (variable.isCloud) {
-                    this.runtime.ioDevices.cloud.requestUpdateVariable(variable.name, variable.value);
-                }
-
                 return true;
             }
         }

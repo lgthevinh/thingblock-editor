@@ -26,7 +26,7 @@ test('importing sb3 project with monitors', t => {
 
         // There should be one additional hidden monitor that is in the monitorState but
         // does not start a thread.
-        t.equal(vm.runtime._monitorState.size, 18);
+        t.equal(vm.runtime.getMonitorState().size, 18);
 
         const stage = vm.runtime.targets[0];
         const shirtSprite = vm.runtime.targets[1];
@@ -34,7 +34,7 @@ test('importing sb3 project with monitors', t => {
 
         // Global variable named "my variable" exists
         let variableId = Object.keys(stage.variables).filter(k => stage.variables[k].name === 'my variable')[0];
-        let monitorRecord = vm.runtime._monitorState.get(variableId);
+        let monitorRecord = vm.runtime.getMonitorState().get(variableId);
         let monitorBlock = vm.runtime.monitorBlocks.getBlock(variableId);
         t.equal(monitorRecord.opcode, 'data_variable');
         t.equal(monitorRecord.mode, 'default');
@@ -60,7 +60,7 @@ test('importing sb3 project with monitors', t => {
 
         // There is a global variable named 'secret_slide' which has a hidden monitor
         variableId = Object.keys(stage.variables).filter(k => stage.variables[k].name === 'secret_slide')[0];
-        monitorRecord = vm.runtime._monitorState.get(variableId);
+        monitorRecord = vm.runtime.getMonitorState().get(variableId);
         monitorBlock = vm.runtime.monitorBlocks.getBlock(variableId);
         t.equal(monitorRecord.opcode, 'data_variable');
         t.equal(monitorRecord.mode, 'slider');
@@ -78,7 +78,7 @@ test('importing sb3 project with monitors', t => {
 
         // Shirt sprite has a local list named "fashion"
         variableId = Object.keys(shirtSprite.variables).filter(k => shirtSprite.variables[k].name === 'fashion')[0];
-        monitorRecord = vm.runtime._monitorState.get(variableId);
+        monitorRecord = vm.runtime.getMonitorState().get(variableId);
         monitorBlock = vm.runtime.monitorBlocks.getBlock(variableId);
         t.equal(monitorRecord.opcode, 'data_listcontents');
         t.equal(monitorRecord.mode, 'list');
@@ -95,7 +95,7 @@ test('importing sb3 project with monitors', t => {
 
         // Shirt sprite has a local variable named "tee"
         variableId = Object.keys(shirtSprite.variables).filter(k => shirtSprite.variables[k].name === 'tee')[0];
-        monitorRecord = vm.runtime._monitorState.get(variableId);
+        monitorRecord = vm.runtime.getMonitorState().get(variableId);
         monitorBlock = vm.runtime.monitorBlocks.getBlock(variableId);
         t.equal(monitorRecord.opcode, 'data_variable');
         t.equal(monitorRecord.mode, 'slider');
@@ -112,7 +112,7 @@ test('importing sb3 project with monitors', t => {
 
         // Heart sprite has a local list named "hearty"
         variableId = Object.keys(heartSprite.variables).filter(k => heartSprite.variables[k].name === 'hearty')[0];
-        monitorRecord = vm.runtime._monitorState.get(variableId);
+        monitorRecord = vm.runtime.getMonitorState().get(variableId);
         monitorBlock = vm.runtime.monitorBlocks.getBlock(variableId);
         t.equal(monitorRecord.opcode, 'data_variable');
         t.equal(monitorRecord.mode, 'default');
@@ -129,7 +129,7 @@ test('importing sb3 project with monitors', t => {
         // should get imported with id that references the name parameter
         // via '_name' at the end since the 3.0 block has a dropdown.
         let monitorId = 'backdropnumbername_name';
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorRecord.opcode, 'looks_backdropnumbername');
         t.equal(monitorRecord.mode, 'default');
@@ -143,7 +143,7 @@ test('importing sb3 project with monitors', t => {
         // should get imported with id that references the name parameter
         // via '_number' at the end since the 3.0 block has a dropdown.
         monitorId = 'backdropnumbername_number';
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorRecord.opcode, 'looks_backdropnumbername');
         t.equal(monitorRecord.mode, 'default');
@@ -155,7 +155,7 @@ test('importing sb3 project with monitors', t => {
 
         // x position monitor is in large mode, specific to shirt sprite
         monitorId = `${shirtSprite.id}_xposition`;
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorRecord.opcode, 'motion_xposition');
         t.equal(monitorRecord.mode, 'large');
@@ -165,7 +165,7 @@ test('importing sb3 project with monitors', t => {
 
         // y position monitor is in large mode, specific to shirt sprite
         monitorId = `${shirtSprite.id}_yposition`;
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorRecord.opcode, 'motion_yposition');
         t.equal(monitorRecord.mode, 'large');
@@ -175,7 +175,7 @@ test('importing sb3 project with monitors', t => {
 
         // direction monitor is in large mode, specific to shirt sprite
         monitorId = `${shirtSprite.id}_direction`;
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorRecord.opcode, 'motion_direction');
         t.equal(monitorRecord.mode, 'large');
@@ -184,7 +184,7 @@ test('importing sb3 project with monitors', t => {
         t.equal(monitorRecord.targetId, shirtSprite.id);
 
         monitorId = `${shirtSprite.id}_size`;
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorRecord.opcode, 'looks_size');
         t.equal(monitorRecord.mode, 'large');
@@ -197,7 +197,7 @@ test('importing sb3 project with monitors', t => {
         // The paramater portion of the id should be lowercase even
         // though the field value on the block is uppercase.
         monitorId = 'current_date';
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         t.equal(monitorRecord.opcode, 'sensing_current');
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorBlock.fields.CURRENTMENU.value, 'DATE');
@@ -207,7 +207,7 @@ test('importing sb3 project with monitors', t => {
         t.equal(monitorRecord.targetId, null);
 
         monitorId = 'current_year';
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         t.equal(monitorRecord.opcode, 'sensing_current');
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorBlock.fields.CURRENTMENU.value, 'YEAR');
@@ -217,7 +217,7 @@ test('importing sb3 project with monitors', t => {
         t.equal(monitorRecord.targetId, null);
 
         monitorId = 'current_month';
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         t.equal(monitorRecord.opcode, 'sensing_current');
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorBlock.fields.CURRENTMENU.value, 'MONTH');
@@ -228,7 +228,7 @@ test('importing sb3 project with monitors', t => {
 
         // Extension Monitors
         monitorId = 'music_getTempo';
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         t.equal(monitorRecord.opcode, 'music_getTempo');
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorRecord.mode, 'default');
@@ -238,7 +238,7 @@ test('importing sb3 project with monitors', t => {
         t.equal(vm.extensionManager.isExtensionLoaded('music'), true);
 
         monitorId = 'ev3_getDistance';
-        monitorRecord = vm.runtime._monitorState.get(monitorId);
+        monitorRecord = vm.runtime.getMonitorState().get(monitorId);
         t.equal(monitorRecord.opcode, 'ev3_getDistance');
         monitorBlock = vm.runtime.monitorBlocks.getBlock(monitorId);
         t.equal(monitorRecord.mode, 'default');

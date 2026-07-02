@@ -511,18 +511,11 @@ const parseScratchObject = function (object, runtime, extensions, topLevel, zip,
     if (Object.prototype.hasOwnProperty.call(object, 'variables')) {
         for (let j = 0; j < object.variables.length; j++) {
             const variable = object.variables[j];
-            // A variable is a cloud variable if:
-            // - the project says it's a cloud variable, and
-            // - it's a stage variable, and
-            // - the runtime can support another cloud variable
-            const isCloud = variable.isPersistent && topLevel && runtime.canAddCloudVariable();
             const newVariable = new Variable(
                 getVariableId(variable.name, Variable.SCALAR_TYPE),
                 variable.name,
-                Variable.SCALAR_TYPE,
-                isCloud
+                Variable.SCALAR_TYPE
             );
-            if (isCloud) runtime.addCloudVariable();
             newVariable.value = variable.value;
             target.variables[newVariable.id] = newVariable;
         }
@@ -612,8 +605,7 @@ const parseScratchObject = function (object, runtime, extensions, topLevel, zip,
             const newVariable = new Variable(
                 getVariableId(list.listName, Variable.LIST_TYPE),
                 list.listName,
-                Variable.LIST_TYPE,
-                false
+                Variable.LIST_TYPE
             );
             newVariable.value = list.contents;
             target.variables[newVariable.id] = newVariable;
@@ -687,8 +679,7 @@ const parseScratchObject = function (object, runtime, extensions, topLevel, zip,
                     const newMsg = new Variable(
                         msgId,
                         msgName,
-                        Variable.BROADCAST_MESSAGE_TYPE,
-                        false
+                        Variable.BROADCAST_MESSAGE_TYPE
                     );
                     target.variables[newMsg.id] = newMsg;
                 }

@@ -22,7 +22,7 @@ test('importing sb3 project with incorrect list monitor name', t => {
         ]) {
             const listId = Object.keys(target.variables).find(k => target.variables[k].name === renamedListName);
 
-            const monitorRecord = vm.runtime._monitorState.get(listId);
+            const monitorRecord = vm.runtime.getMonitorState().get(listId);
             const monitorBlock = vm.runtime.monitorBlocks.getBlock(listId);
             t.equal(monitorRecord.opcode, 'data_listcontents');
 

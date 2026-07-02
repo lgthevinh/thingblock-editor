@@ -45,10 +45,6 @@ class Scratch3DataBlocks {
         const variable = util.target.lookupOrCreateVariable(
             args.VARIABLE.id, args.VARIABLE.name);
         variable.value = args.VALUE;
-
-        if (variable.isCloud) {
-            util.ioQuery('cloud', 'requestUpdateVariable', [variable.name, args.VALUE]);
-        }
     }
 
     changeVariableBy (args, util) {
@@ -58,10 +54,6 @@ class Scratch3DataBlocks {
         const dValue = Cast.toNumber(args.VALUE);
         const newValue = castedValue + dValue;
         variable.value = newValue;
-
-        if (variable.isCloud) {
-            util.ioQuery('cloud', 'requestUpdateVariable', [variable.name, newValue]);
-        }
     }
 
     changeMonitorVisibility (id, visible) {

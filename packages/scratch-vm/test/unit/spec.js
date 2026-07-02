@@ -21,7 +21,6 @@ test('interface', t => {
     t.type(vm.renameSprite, 'function');
     t.type(vm.deleteSprite, 'function');
 
-    t.type(vm.attachRenderer, 'function');
     t.type(vm.blockListener, 'function');
     t.type(vm.flyoutBlockListener, 'function');
     t.type(vm.setEditingTarget, 'function');

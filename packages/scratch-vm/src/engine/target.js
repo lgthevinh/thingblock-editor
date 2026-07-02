@@ -132,7 +132,7 @@ class Target extends EventEmitter {
         if (variable) return variable;
 
         // No variable with this name exists - create it locally.
-        const newVariable = new Variable(id, name, Variable.SCALAR_TYPE, false);
+        const newVariable = new Variable(id, name, Variable.SCALAR_TYPE);
         this.variables[id] = newVariable;
         return newVariable;
     }
@@ -255,7 +255,7 @@ class Target extends EventEmitter {
         if (list) return list;
 
         // No variable with this name exists - create it locally.
-        const newList = new Variable(id, name, Variable.LIST_TYPE, false);
+        const newList = new Variable(id, name, Variable.LIST_TYPE);
         this.variables[id] = newList;
         return newList;
     }
@@ -266,18 +266,11 @@ class Target extends EventEmitter {
      * @param {string} id Id of variable
      * @param {string} name Name of variable.
      * @param {string} type Type of variable, '', 'broadcast_msg', or 'list'
-     * @param {boolean} isCloud Whether the variable to create has the isCloud flag set.
-     * Additional checks are made that the variable can be created as a cloud variable.
      * @param {string} [dataType] Explicit value type for code generation, one of 'int', 'float', or 'string'.
      */
-    createVariable (id, name, type, isCloud, dataType) {
+    createVariable (id, name, type, dataType) {
         if (!Object.prototype.hasOwnProperty.call(this.variables, id)) {
-            const newVariable = new Variable(id, name, type, false, dataType);
-            if (isCloud && this.isStage && this.runtime.canAddCloudVariable()) {
-                newVariable.isCloud = true;
-                this.runtime.addCloudVariable();
-                this.runtime.ioDevices.cloud.requestCreateVariable(newVariable);
-            }
+            const newVariable = new Variable(id, name, type, dataType);
             this.variables[id] = newVariable;
         }
     }
@@ -325,10 +318,6 @@ class Target extends EventEmitter {
                 variable.name = newName;
 
                 if (this.runtime) {
-                    if (variable.isCloud && this.isStage) {
-                        this.runtime.ioDevices.cloud.requestRenameVariable(oldName, newName);
-                    }
-
                     if (variable.type === Variable.SCALAR_TYPE) {
                         // sensing__of may be referencing to this variable.
                         // Change the reference.
@@ -370,15 +359,8 @@ class Target extends EventEmitter {
      */
     deleteVariable (id) {
         if (Object.prototype.hasOwnProperty.call(this.variables, id)) {
-            // Get info about the variable before deleting it
-            const deletedVariableName = this.variables[id].name;
-            const deletedVariableWasCloud = this.variables[id].isCloud;
             delete this.variables[id];
             if (this.runtime) {
-                if (deletedVariableWasCloud && this.isStage) {
-                    this.runtime.ioDevices.cloud.requestDeleteVariable(deletedVariableName);
-                    this.runtime.removeCloudVariable();
-                }
                 this.runtime.monitorBlocks.deleteBlock(id);
                 this.runtime.requestRemoveMonitor(id);
             }
@@ -420,8 +402,7 @@ class Target extends EventEmitter {
             const newVariable = new Variable(
                 optKeepOriginalId ? id : null, // conditionally keep original id or generate a new one
                 originalVariable.name,
-                originalVariable.type,
-                originalVariable.isCloud
+                originalVariable.type
             );
             if (newVariable.type === Variable.LIST_TYPE) {
                 newVariable.value = originalVariable.value.slice(0);

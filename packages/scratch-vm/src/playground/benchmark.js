@@ -35,10 +35,6 @@ class LoadingMiddleware {
     }
 }
 
-const importLoadCostume = require('../import/load-costume');
-const costumeMiddleware = new LoadingMiddleware();
-importLoadCostume.loadCostume = costumeMiddleware.install(importLoadCostume, importLoadCostume.loadCostume);
-
 const importLoadSound = require('../import/load-sound');
 const soundMiddleware = new LoadingMiddleware();
 importLoadSound.loadSound = soundMiddleware.install(importLoadSound, importLoadSound.loadSound);
@@ -47,9 +43,7 @@ const ScratchStorage = require('@scratch/scratch-storage').ScratchStorage;
 const VirtualMachine = require('..');
 const Runtime = require('../engine/runtime');
 
-const ScratchRender = require('@scratch/scratch-render');
 const AudioEngine = require('scratch-audio');
-const ScratchSVGRenderer = require('@scratch/scratch-svg-renderer');
 
 const Scratch = window.Scratch = window.Scratch || {};
 
@@ -149,7 +143,6 @@ class LoadingProgress {
     on (storage, vm) {
         const _this = this;
 
-        this.attachHydrateMiddleware(costumeMiddleware);
         this.attachHydrateMiddleware(soundMiddleware);
 
         const _load = storage.webHelper.load;
@@ -643,14 +636,9 @@ const runBenchmark = function () {
         maxRecordedTime
     }).run();
 
-    // Instantiate the renderer and connect it to the VM.
     const canvas = document.getElementById('scratch-stage');
-    const renderer = new ScratchRender(canvas);
-    Scratch.renderer = renderer;
-    vm.attachRenderer(renderer);
     const audioEngine = new AudioEngine();
     vm.attachAudioEngine(audioEngine);
-    vm.attachV2BitmapAdapter(new ScratchSVGRenderer.BitmapAdapter());
 
     // Feed mouse events as VM I/O events.
     document.addEventListener('mousemove', e => {

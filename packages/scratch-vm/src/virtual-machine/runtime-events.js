@@ -92,9 +92,6 @@ const wireRuntimeEvents = vm => {
     vm.runtime.on(Runtime.RUNTIME_STARTED, () => {
         vm.emit(Runtime.RUNTIME_STARTED);
     });
-    vm.runtime.on(Runtime.HAS_CLOUD_DATA_UPDATE, hasCloudData => {
-        vm.emit(Runtime.HAS_CLOUD_DATA_UPDATE, hasCloudData);
-    });
     vm.runtime.on(Runtime.DEVICE_CONNECTED, () =>
         vm.emit(Runtime.DEVICE_CONNECTED)
     );

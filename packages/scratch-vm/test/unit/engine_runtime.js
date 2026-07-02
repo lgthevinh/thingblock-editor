@@ -14,11 +14,6 @@ test('spec', t => {
     t.type(Runtime, 'function');
     t.type(r, 'object');
 
-    // Test types of cloud data managing functions
-    t.type(r.hasCloudData, 'function');
-    t.type(r.canAddCloudVariable, 'function');
-    t.type(r.addCloudVariable, 'function');
-    t.type(r.removeCloudVariable, 'function');
 
     t.ok(r instanceof Runtime);
 
@@ -40,8 +35,9 @@ test('monitorStateEquals', t => {
     r.requestAddMonitor(prevMonitorState);
     r.requestUpdateMonitor(newMonitorDelta);
 
-    t.equal(true, prevMonitorState === r._monitorState.get(id));
-    t.equal(String(25), r._monitorState.get(id).get('value'));
+    t.equal(true, prevMonitorState === r.getMonitorState().get(id));
+    t.equal(String(25), r.getMonitorState().get(id)
+        .get('value'));
     t.end();
 });
 
@@ -63,8 +59,9 @@ test('monitorStateDoesNotEqual', t => {
     r.requestAddMonitor(prevMonitorState);
     r.requestUpdateMonitor(newMonitorDelta);
 
-    t.equal(false, prevMonitorState.equals(r._monitorState.get(id)));
-    t.equal(String(24), r._monitorState.get(id).get('value'));
+    t.equal(false, prevMonitorState.equals(r.getMonitorState().get(id)));
+    t.equal(String(24), r.getMonitorState().get(id)
+        .get('value'));
 
     // Prop change
     newMonitorDelta = Map({
@@ -73,9 +70,9 @@ test('monitorStateDoesNotEqual', t => {
     });
     r.requestUpdateMonitor(newMonitorDelta);
 
-    t.equal(false, prevMonitorState.equals(r._monitorState.get(id)));
-    t.equal(String(24), r._monitorState.get(id).value);
-    t.equal(params, r._monitorState.get(id).params);
+    t.equal(false, prevMonitorState.equals(r.getMonitorState().get(id)));
+    t.equal(String(24), r.getMonitorState().get(id).value);
+    t.equal(params, r.getMonitorState().get(id).params);
 
     t.end();
 });
@@ -135,52 +132,6 @@ test('Project loaded emits runtime event', t => {
         t.equal(projectLoaded, true, 'Project load event emitted');
         t.end();
     });
-});
-
-test('Cloud variable limit allows only 10 cloud variables', t => {
-    // This is a test of just the cloud variable limit mechanism
-    // The functions being tested below need to be used when
-    // creating and deleting cloud variables in the runtime.
-
-    const rt = new Runtime();
-
-    t.equal(rt.hasCloudData(), false);
-
-    for (let i = 0; i < 10; i++) {
-        t.equal(rt.canAddCloudVariable(), true);
-        rt.addCloudVariable();
-        // Adding a cloud variable should change the
-        // result of the hasCloudData check
-        t.equal(rt.hasCloudData(), true);
-    }
-
-
-    // We should be at the cloud variable limit now
-    t.equal(rt.canAddCloudVariable(), false);
-
-    // Removing a cloud variable should allow the addition of exactly one more
-    // when we are at the cloud variable limit
-    rt.removeCloudVariable();
-
-    t.equal(rt.canAddCloudVariable(), true);
-    rt.addCloudVariable();
-    t.equal(rt.canAddCloudVariable(), false);
-
-    // Disposing of the runtime should reset the cloud variable limitations
-    rt.dispose();
-    t.equal(rt.hasCloudData(), false);
-
-    for (let i = 0; i < 10; i++) {
-        t.equal(rt.canAddCloudVariable(), true);
-        rt.addCloudVariable();
-        t.equal(rt.hasCloudData(), true);
-    }
-
-    // We should be at the cloud variable limit now
-    t.equal(rt.canAddCloudVariable(), false);
-
-    t.end();
-
 });
 
 test('Starting the runtime emits an event', t => {

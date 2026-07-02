@@ -468,8 +468,6 @@ const serializeVariables = function (variables) {
 
         // otherwise should be a scalar type
         obj.variables[varId] = [v.name, v.value];
-        // only scalar vars have the potential to be cloud vars
-        if (v.isCloud) obj.variables[varId].push(true);
         if (v.dataType) obj.variableTypes[varId] = v.dataType;
     }
     return obj;
@@ -1102,19 +1100,11 @@ const parseScratchObject = function (object, runtime, extensions, zip, assets) {
     if (Object.prototype.hasOwnProperty.call(object, 'variables')) {
         for (const varId in object.variables) {
             const variable = object.variables[varId];
-            // A variable is a cloud variable if:
-            // - the project says it's a cloud variable, and
-            // - it's a stage variable, and
-            // - the runtime can support another cloud variable
-            const isCloud = (variable.length === 3) && variable[2] &&
-                object.isStage && runtime.canAddCloudVariable();
             const newVariable = new Variable(
                 varId, // var id is the index of the variable desc array in the variables obj
                 variable[0], // name of the variable
-                Variable.SCALAR_TYPE, // type of the variable
-                isCloud
+                Variable.SCALAR_TYPE // type of the variable
             );
-            if (isCloud) runtime.addCloudVariable();
             newVariable.value = variable[1];
             if (object.variableTypes) {
                 newVariable.dataType = Variable.normalizeDataType(object.variableTypes[varId]);
@@ -1128,8 +1118,7 @@ const parseScratchObject = function (object, runtime, extensions, zip, assets) {
             const newList = new Variable(
                 listId,
                 list[0],
-                Variable.LIST_TYPE,
-                false
+                Variable.LIST_TYPE
             );
             newList.value = list[1];
             target.variables[newList.id] = newList;
@@ -1141,8 +1130,7 @@ const parseScratchObject = function (object, runtime, extensions, zip, assets) {
             const newBroadcast = new Variable(
                 broadcastId,
                 broadcast,
-                Variable.BROADCAST_MESSAGE_TYPE,
-                false
+                Variable.BROADCAST_MESSAGE_TYPE
             );
             // no need to explicitly set the value, variable constructor
             // sets the value to the same as the name for broadcast msgs

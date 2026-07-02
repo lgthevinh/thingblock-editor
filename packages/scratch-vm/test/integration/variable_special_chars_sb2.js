@@ -36,7 +36,7 @@ test('importing sb2 project with special chars in variable names', t => {
 
         const abVarId = Object.keys(stage.variables).filter(k => stage.variables[k].name === 'a&b')[0];
         const abVar = stage.variables[abVarId];
-        const abMonitor = vm.runtime._monitorState.get(abVarId);
+        const abMonitor = vm.runtime.getMonitorState().get(abVarId);
         // Check for unsafe characters, replaceUnsafeChars should just result in the original string
         // (e.g. there was nothing to replace)
         // Check that the variable ID does not have any unsafe characters
@@ -66,7 +66,7 @@ test('importing sb2 project with special chars in variable names', t => {
 
         const fooVarId = Object.keys(stage.variables).filter(k => stage.variables[k].name === '"foo')[0];
         const fooVar = stage.variables[fooVarId];
-        const fooMonitor = vm.runtime._monitorState.get(fooVarId);
+        const fooMonitor = vm.runtime.getMonitorState().get(fooVarId);
         // Check for unsafe characters, replaceUnsafeChars should just result in the original string
         // (e.g. there was nothing to replace)
         // Check that the variable ID does not have any unsafe characters
@@ -94,7 +94,7 @@ test('importing sb2 project with special chars in variable names', t => {
 
         const ltPerfectVarId = Object.keys(bananas.variables).filter(k => bananas.variables[k].name === '< Perfect')[0];
         const ltPerfectVar = bananas.variables[ltPerfectVarId];
-        const ltPerfectMonitor = vm.runtime._monitorState.get(ltPerfectVarId);
+        const ltPerfectMonitor = vm.runtime.getMonitorState().get(ltPerfectVarId);
         // Check for unsafe characters, replaceUnsafeChars should just result in the original string
         // (e.g. there was nothing to replace)
         // Check that the variable ID does not have any unsafe characters

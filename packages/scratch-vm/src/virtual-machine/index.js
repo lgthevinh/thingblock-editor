@@ -171,14 +171,6 @@ class VirtualMachine extends EventEmitter {
         }
     }
 
-    setVideoProvider (videoProvider) {
-        this.runtime.ioDevices.video.setProvider(videoProvider);
-    }
-
-    setCloudProvider (cloudProvider) {
-        this.runtime.ioDevices.cloud.setProvider(cloudProvider);
-    }
-
     /**
      * Tell the specified extension to scan for a peripheral.
      * @param {string} extensionId - the id of the extension.

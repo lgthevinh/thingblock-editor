@@ -270,7 +270,6 @@ module.exports = class ProjectIoMixin {
             this.emitTargetsUpdate(false /* Don't emit project change */);
             this.emitWorkspaceUpdate();
             this.runtime.setEditingTarget(this.editingTarget);
-            this.runtime.ioDevices.cloud.setStage(this.runtime.getTargetForStage());
         });
     }
 
