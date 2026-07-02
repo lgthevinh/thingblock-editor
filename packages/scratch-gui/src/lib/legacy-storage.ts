@@ -1,9 +1,8 @@
 import {ScratchStorage, Asset} from '@scratch/scratch-storage';
 
 import defaultProject from './default-project';
-import {GUIStorage, TranslatorFunction, VirtualMachine, GUICloudVariableProvider} from '../gui-config';
+import {GUIStorage, TranslatorFunction} from '../gui-config';
 import {LegacyBackpackStorage} from './legacy-backpack-storage';
-import CloudProvider from './cloud-provider';
 
 import saveProjectToServer from '../lib/save-project-to-server';
 
@@ -27,17 +26,6 @@ export class LegacyStorage implements GUIStorage {
             });
         }
     });
-    readonly cloudVariables = {
-        createProvider (
-            cloudHost: string,
-            vm: VirtualMachine,
-            username: string,
-            projectId: string
-        ): GUICloudVariableProvider {
-            return new CloudProvider(cloudHost, vm, username, projectId);
-        }
-    };
-
     constructor () {
         this.cacheDefaultProject(this.scratchStorage);
         this.addOfficialScratchWebStores(this.scratchStorage);

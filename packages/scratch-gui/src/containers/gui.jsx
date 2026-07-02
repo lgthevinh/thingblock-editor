@@ -37,7 +37,6 @@ import ProjectSaverHOC from '../lib/project-saver-hoc.jsx';
 import QueryParserHOC from '../lib/query-parser-hoc.jsx';
 import vmListenerHOC from '../lib/vm-listener-hoc.jsx';
 import vmManagerHOC from '../lib/vm-manager-hoc.jsx';
-import cloudManagerHOC from '../lib/cloud-manager-hoc.jsx';
 import systemPreferencesHOC from '../lib/system-preferences-hoc.jsx';
 import {PLATFORM} from '../lib/platform.js';
 
@@ -98,7 +97,6 @@ class GUI extends React.Component {
         const {
              
             assetHost,
-            cloudHost,
             error,
             isError,
             isShowingProject,
@@ -133,7 +131,6 @@ GUI.propTypes = {
     accountMenuOptions: AccountMenuOptionsPropTypes,
     assetHost: PropTypes.string,
     children: PropTypes.node,
-    cloudHost: PropTypes.string,
     dynamicAssets: PropTypes.shape({
         backdrops: PropTypes.arrayOf(costumeShape),
         costumes: PropTypes.arrayOf(costumeShape),
@@ -148,9 +145,6 @@ GUI.propTypes = {
     isShowingProject: PropTypes.bool,
     isTotallyNormal: PropTypes.bool,
     loadingStateVisible: PropTypes.bool,
-    manuallySaveThumbnails: PropTypes.bool,
-    onSetManualThumbnail: PropTypes.func,
-    onSetManualThumbnailButtonClick: PropTypes.func,
     onProjectLoaded: PropTypes.func,
     onSeeCommunity: PropTypes.func,
     onStorageInit: PropTypes.func,
@@ -243,7 +237,6 @@ const WrappedGui = compose(
     vmListenerHOC,
     vmManagerHOC,
     SBFileUploaderHOC,
-    cloudManagerHOC,
     systemPreferencesHOC
 )(ConnectedGUI);
 

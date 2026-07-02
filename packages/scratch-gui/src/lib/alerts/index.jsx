@@ -172,39 +172,6 @@ const alerts = [
         level: AlertLevels.INFO
     },
     {
-        alertId: 'cloudInfo',
-        alertType: AlertTypes.STANDARD,
-        clearList: ['cloudInfo'],
-        content: (
-            <FormattedMessage
-                defaultMessage="Please note, cloud variables only support numbers, not letters or symbols. <a>{learnMoreLink}</a>" // eslint-disable-line @stylistic/max-len
-                description="Info about cloud variable limitations"
-                id="gui.alerts.cloudInfo"
-                values={{
-                    learnMoreLink: (
-                        <FormattedMessage
-                            defaultMessage="Learn more."
-                            description="Link text to cloud var faq"
-                            id="gui.alerts.cloudInfoLearnMore"
-                        />
-                    ),
-                    a: learnMoreLink => (
-                        <a
-                            href="https://scratch.mit.edu/info/faq/#clouddata"
-                            rel="noopener noreferrer"
-                            target="_blank"
-                        >
-                            {learnMoreLink}
-                        </a>
-                    )
-                }}
-            />
-        ),
-        closeButton: true,
-        level: AlertLevels.SUCCESS,
-        maxDisplaySecs: 15
-    },
-    {
         alertId: 'importingAsset',
         alertType: AlertTypes.STANDARD,
         clearList: [],

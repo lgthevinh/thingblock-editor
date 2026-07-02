@@ -107,7 +107,6 @@ const GUIComponent = props => {
         canSave,
         canCreateCopy,
         canShare,
-        canUseCloud,
         children,
         connectionModalVisible,
         debugModalVisible,
@@ -124,9 +123,6 @@ const GUIComponent = props => {
         isTotallyNormal,
         loading,
         logo,
-        manuallySaveThumbnails,
-        onSetManualThumbnail,
-        onSetManualThumbnailButtonClick,
         menuBarHidden,
         renderLogin,
         onClickAbout,
@@ -149,7 +145,6 @@ const GUIComponent = props => {
         onTelemetryModalCancel,
         onTelemetryModalOptIn,
         onTelemetryModalOptOut,
-        onUpdateProjectThumbnail,
         showNewFeatureCallouts,
         stageSizeMode,
         connectedBoard,
@@ -469,7 +464,6 @@ const GUIComponent = props => {
                                     >
                                         <Blocks
                                             key={`${blocksId}/${colorMode}/${theme}`}
-                                            canUseCloud={canUseCloud}
                                             grow={1}
                                             isVisible={blocksTabVisible}
                                             options={{
@@ -556,7 +550,6 @@ GUIComponent.propTypes = {
     canRemix: PropTypes.bool,
     canSave: PropTypes.bool,
     canShare: PropTypes.bool,
-    canUseCloud: PropTypes.bool,
     cardsVisible: PropTypes.bool,
     children: PropTypes.node,
     debugModalVisible: PropTypes.bool,
@@ -572,9 +565,6 @@ GUIComponent.propTypes = {
     isTotallyNormal: PropTypes.bool,
     loading: PropTypes.bool,
     logo: PropTypes.string,
-    manuallySaveThumbnails: PropTypes.bool,
-    onSetManualThumbnail: PropTypes.func,
-    onSetManualThumbnailButtonClick: PropTypes.func,
     menuBarHidden: PropTypes.bool,
     onActivateTab: PropTypes.func,
     onClickLogo: PropTypes.func,
@@ -595,7 +585,6 @@ GUIComponent.propTypes = {
     onTelemetryModalOptIn: PropTypes.func,
     onTelemetryModalOptOut: PropTypes.func,
     onToggleLoginOpen: PropTypes.func,
-    onUpdateProjectThumbnail: PropTypes.func,
     platform: PropTypes.oneOf(Object.keys(PLATFORM)),
     renderLogin: PropTypes.func,
     setTheme: PropTypes.func.isRequired,
@@ -630,7 +619,6 @@ GUIComponent.defaultProps = {
     canSave: false,
     canCreateCopy: false,
     canShare: false,
-    canUseCloud: false,
     enableCommunity: false,
     isCreating: false,
     isShared: false,

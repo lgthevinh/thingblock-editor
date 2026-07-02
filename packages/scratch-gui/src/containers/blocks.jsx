@@ -696,7 +696,7 @@ class Blocks extends React.Component {
     }
 
     /*
-     * Pass along information about proposed name and variable options (scope and isCloud)
+     * Pass along information about proposed name and variable options (e.g. scope)
      * and additional potentially conflicting variable names from the VM
      * to the variable validation prompt callback used in scratch-blocks.
      */
@@ -728,7 +728,6 @@ class Blocks extends React.Component {
          
         const {
             anyModalVisible,
-            canUseCloud,
             customProceduresVisible,
             extensionLibraryVisible,
             options,
@@ -792,7 +791,6 @@ class Blocks extends React.Component {
 
 Blocks.propTypes = {
     anyModalVisible: PropTypes.bool,
-    canUseCloud: PropTypes.bool,
     customProceduresVisible: PropTypes.bool,
     extensionLibraryVisible: PropTypes.bool,
     isRtl: PropTypes.bool,

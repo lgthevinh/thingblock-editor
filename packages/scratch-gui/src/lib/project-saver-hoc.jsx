@@ -6,7 +6,6 @@ import VM from '@scratch/scratch-vm';
 
 import collectMetadata from '../lib/collect-metadata';
 import log from '../lib/log';
-import dataURItoBlob from '../lib/data-uri-to-blob';
 
 import {
     showAlertWithTimeout,
@@ -32,7 +31,6 @@ import {
     projectError
 } from '../reducers/project-state';
 import {GUIStoragePropType} from '../gui-config';
-import {getProjectThumbnail, storeProjectThumbnail} from './store-project-thumbnail';
 
 /**
  * Higher Order Component to provide behavior for saving projects.
@@ -59,9 +57,8 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 window.onbeforeunload = e => this.leavePageConfirm(e);
             }
             // Allow the GUI consumer to pass in a function to receive a trigger
-            // for triggering thumbnail or whole project saves.
-            // These functions are called with null on unmount to prevent stale references.
-            this.props.onSetProjectThumbnailer(callback => getProjectThumbnail(this.props.vm, callback));
+            // for triggering whole project saves.
+            // The function is called with null on unmount to prevent stale references.
             this.props.onSetProjectSaver(this.tryToAutoSave);
         }
         componentDidUpdate (prevProps) {
@@ -70,23 +67,6 @@ const ProjectSaverHOC = function (WrappedComponent) {
             }
             if (!this.props.isLoading && prevProps.isLoading) {
                 this.reportTelemetryEvent('projectDidLoad');
-            }
-
-            if (
-                !this.props.manuallySaveThumbnails &&
-                this.props.onUpdateProjectThumbnail &&
-                this.props.saveThumbnailOnLoad &&
-                this.props.isShowingWithId &&
-                !prevProps.isShowingWithId
-            ) {
-                setTimeout(() =>
-                    storeProjectThumbnail(this.props.vm, dataURI => {
-                        this.props.onUpdateProjectThumbnail(
-                            this.props.reduxProjectId,
-                            dataURItoBlob(dataURI)
-                        );
-                    })
-                );
             }
 
             if (this.props.projectChanged && !prevProps.projectChanged) {
@@ -134,8 +114,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
             // i.e. if another of this component has been mounted before this one gets unmounted
             // which happens when going from project to editor view.
             // window.onbeforeunload = undefined; // eslint-disable-line no-undefined
-            // Remove project thumbnailer function since the components are unmounting
-            this.props.onSetProjectThumbnailer(null);
+            // Remove project saver function since the components are unmounting
             this.props.onSetProjectSaver(null);
         }
         leavePageConfirm (e) {
@@ -268,18 +247,6 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 .then(() => saveProject(projectId, savedVMState, requestParams))
                 .then(response => {
                     this.props.onSetProjectUnchanged();
-                    const id = response.id.toString();
-                    if (this.props.onUpdateProjectThumbnail && id && (
-                        !this.props.manuallySaveThumbnails ||
-                        // Always save thumbnail on project creation
-                        options?.isCreatingProject)) {
-                        storeProjectThumbnail(this.props.vm, dataURI => {
-                            this.props.onUpdateProjectThumbnail(
-                                id,
-                                dataURItoBlob(dataURI)
-                            );
-                        });
-                    }
                     this.reportTelemetryEvent('projectDidSave');
                     return response;
                 })
@@ -330,7 +297,6 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 onProjectError,
                 onRemixing,
                 onSetProjectUnchanged,
-                onSetProjectThumbnailer,
                 onSetProjectSaver,
                 onShowAlert,
                 onShowCopySuccessAlert,
@@ -345,8 +311,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 reduxProjectId,
                 reduxProjectTitle,
                 setAutoSaveTimeoutId: setAutoSaveTimeoutIdProp,
-                saveThumbnailOnLoad,
-                 
+
                 ...componentProps
             } = this.props;
             return (
@@ -383,7 +348,6 @@ const ProjectSaverHOC = function (WrappedComponent) {
         onProjectTelemetryEvent: PropTypes.func,
         onRemixing: PropTypes.func,
         onSetProjectSaver: PropTypes.func.isRequired,
-        onSetProjectThumbnailer: PropTypes.func.isRequired,
         onSetProjectUnchanged: PropTypes.func.isRequired,
         onShowAlert: PropTypes.func,
         onShowCopySuccessAlert: PropTypes.func,
@@ -393,25 +357,20 @@ const ProjectSaverHOC = function (WrappedComponent) {
         onShowSaveSuccessAlert: PropTypes.func,
         onShowSavingAlert: PropTypes.func,
         onUpdateProjectData: PropTypes.func,
-        onUpdateProjectThumbnail: PropTypes.func,
         onUpdatedProject: PropTypes.func,
         noBeforeUnloadHandler: PropTypes.bool.isRequired,
         projectChanged: PropTypes.bool,
         reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         reduxProjectTitle: PropTypes.string,
-        saveThumbnailOnLoad: PropTypes.bool,
         storage: GUIStoragePropType,
         setAutoSaveTimeoutId: PropTypes.func.isRequired,
-        manuallySaveThumbnails: PropTypes.bool,
         vm: PropTypes.instanceOf(VM).isRequired
     };
     ProjectSaverComponent.defaultProps = {
         autoSaveIntervalSecs: 600, // 10 minutes = 600 seconds
         onRemixing: () => {},
-        onSetProjectThumbnailer: () => {},
         onSetProjectSaver: () => {},
-        noBeforeUnloadHandler: false,
-        saveThumbnailOnLoad: false
+        noBeforeUnloadHandler: false
     };
     const mapStateToProps = (state, ownProps) => {
         const loadingState = state.scratchGui.projectState.loadingState;
@@ -432,10 +391,6 @@ const ProjectSaverHOC = function (WrappedComponent) {
             isManualUpdating: getIsManualUpdating(loadingState),
             loadingState: loadingState,
             locale: state.locales.locale,
-            manuallySaveThumbnails: ownProps.manuallySaveThumbnails ?? false,
-            onUpdateProjectThumbnail:
-                ownProps.onUpdateProjectThumbnail ??
-                storage.saveProjectThumbnail?.bind(storage),
             projectChanged: state.scratchGui.projectChanged,
             reduxProjectId: state.scratchGui.projectState.projectId,
             reduxProjectTitle: state.scratchGui.projectTitle,
